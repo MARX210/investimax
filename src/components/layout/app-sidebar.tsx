@@ -9,7 +9,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard } from 'lucide-react';
+import { LayoutDashboard, Target } from 'lucide-react';
 import Logo from '@/components/logo';
 
 export default function AppSidebar() {
@@ -30,6 +30,16 @@ export default function AppSidebar() {
             >
               <LayoutDashboard />
               <span>Dashboard</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              href="/investimentos"
+              isActive={pathname === '/investimentos'}
+              tooltip="Investimentos"
+            >
+              <Target />
+              <span>Investimentos</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

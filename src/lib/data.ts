@@ -1,5 +1,5 @@
-import type { Transaction } from './types';
-import { subMonths, subDays } from 'date-fns';
+import type { Transaction, Investment } from './types';
+import { subMonths, subDays, subYears } from 'date-fns';
 
 const now = new Date();
 
@@ -77,6 +77,30 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
   },
 ];
 
+export const MOCK_INVESTMENTS: Investment[] = [
+    {
+        id: 'inv-1',
+        type: 'Tesouro Selic',
+        amount: 10000,
+        yieldRate: 10.75,
+        startDate: subYears(now, 1).toISOString(),
+    },
+    {
+        id: 'inv-2',
+        type: 'CDB Banco X',
+        amount: 5000,
+        yieldRate: 12.5,
+        startDate: subMonths(now, 6).toISOString(),
+    },
+    {
+        id: 'inv-3',
+        type: 'Poupança',
+        amount: 15000,
+        yieldRate: 6.17,
+        startDate: subYears(now, 2).toISOString(),
+    },
+];
+
 export const TRANSACTION_CATEGORIES = {
   income: ['Salário', 'Renda Extra', 'Investimentos', 'Outros'],
   expense: [
@@ -100,3 +124,15 @@ export const PAYMENT_METHODS = {
     cash: 'Dinheiro',
     other: 'Outro'
 }
+
+export const INVESTMENT_TYPES = [
+    'Poupança',
+    'Tesouro Direto',
+    'CDB',
+    'LCI/LCA',
+    'Ações',
+    'Fundos Imobiliários',
+    'Fundos de Investimento',
+    'Criptomoedas',
+    'Outro'
+]

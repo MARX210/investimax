@@ -8,3 +8,11 @@ export type Transaction = {
   isRecurring?: boolean; // For income
   paymentMethod?: 'credit' | 'debit' | 'pix' | 'cash' | 'other';
 };
+
+export type Investment = {
+  id: string;
+  type: string;
+  amount: number;
+  yieldRate: number;
+  startDate: string; // ISO 8601 format
+};
