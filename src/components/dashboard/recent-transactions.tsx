@@ -30,8 +30,12 @@ import type { Transaction } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import EditTransactionSheet from '@/components/transactions/edit-transaction-sheet';
 
-export default function RecentTransactions() {
-  const { transactions, deleteTransaction } = useTransactions();
+type RecentTransactionsProps = {
+  transactions: Transaction[];
+};
+
+export default function RecentTransactions({ transactions: filteredTransactions }: RecentTransactionsProps) {
+  const { deleteTransaction } = useTransactions();
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [isClient, setIsClient] = useState(false);
   const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null);
@@ -45,12 +49,12 @@ export default function RecentTransactions() {
   }, []);
 
   useEffect(() => {
-    const sorted = transactions
+    const sorted = filteredTransactions
       .slice()
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5);
     setRecentTransactions(sorted);
-  }, [transactions]);
+  }, [filteredTransactions]);
   
   const handleEdit = (transaction: Transaction) => {
     setTransactionToEdit(transaction);
@@ -80,7 +84,7 @@ export default function RecentTransactions() {
     <Card className="h-full">
       <CardHeader>
         <CardTitle>Transações Recentes</CardTitle>
-        <CardDescription>Suas últimas 5 movimentações financeiras.</CardDescription>
+        <CardDescription>Suas últimas 5 movimentações no mês selecionado.</CardDescription>
       </CardHeader>
       <CardContent>
         {!isClient ? (
@@ -153,7 +157,7 @@ export default function RecentTransactions() {
           </div>
         ) : (
           <div className="flex h-24 items-center justify-center rounded-md border border-dashed">
-            <p className="text-sm text-muted-foreground">Nenhuma transação registrada.</p>
+            <p className="text-sm text-muted-foreground">Nenhuma transação registrada neste mês.</p>
           </div>
         )}
       </CardContent>

@@ -3,13 +3,17 @@
 import * as React from 'react';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useTransactions } from '@/hooks/use-transactions';
 import { formatCurrency } from '@/lib/utils';
-import { eachMonthOfInterval, format, startOfYear, endOfYear, getMonth } from 'date-fns';
+import { eachMonthOfInterval, format, startOfYear, endOfYear, getMonth, getYear } from 'date-fns';
+import type { Transaction } from '@/lib/types';
 
-export default function MonthlySummaryChart() {
-  const { transactions } = useTransactions();
+type MonthlySummaryChartProps = {
+  transactions: Transaction[];
+};
 
+
+export default function MonthlySummaryChart({ transactions }: MonthlySummaryChartProps) {
+  
   const chartData = React.useMemo(() => {
     const now = new Date();
     const yearStart = startOfYear(now);
@@ -22,11 +26,14 @@ export default function MonthlySummaryChart() {
     }));
     
     transactions.forEach((t) => {
-      const monthIndex = getMonth(new Date(t.date));
-      if (t.type === 'income') {
-        monthlyData[monthIndex].income += t.amount;
-      } else {
-        monthlyData[monthIndex].expense += t.amount;
+      const transactionDate = new Date(t.date);
+      if (getYear(transactionDate) === getYear(now)) {
+        const monthIndex = getMonth(transactionDate);
+        if (t.type === 'income') {
+            monthlyData[monthIndex].income += t.amount;
+        } else {
+            monthlyData[monthIndex].expense += t.amount;
+        }
       }
     });
 
@@ -36,7 +43,7 @@ export default function MonthlySummaryChart() {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>Resumo Mensal</CardTitle>
+        <CardTitle>Resumo Anual</CardTitle>
         <CardDescription>Comparativo de receitas e despesas do ano.</CardDescription>
       </CardHeader>
       <CardContent>

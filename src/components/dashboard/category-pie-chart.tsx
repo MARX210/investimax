@@ -3,9 +3,9 @@
 import * as React from 'react';
 import { Pie, PieChart, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useTransactions } from '@/hooks/use-transactions';
 import { cn, formatCurrency } from '@/lib/utils';
 import { getCategoryIcon } from '@/lib/icons';
+import type { Transaction } from '@/lib/types';
 
 const COLORS = [
   'hsl(var(--chart-1))',
@@ -15,9 +15,11 @@ const COLORS = [
   'hsl(var(--chart-5))',
 ];
 
-export default function CategoryPieChart() {
-  const { transactions } = useTransactions();
+type CategoryPieChartProps = {
+    transactions: Transaction[];
+};
 
+export default function CategoryPieChart({ transactions }: CategoryPieChartProps) {
   const expenseData = React.useMemo(() => {
     const categoryTotals = transactions
       .filter((t) => t.type === 'expense')
@@ -42,7 +44,7 @@ export default function CategoryPieChart() {
       <Card className="h-full flex flex-col">
         <CardHeader>
           <CardTitle>Despesas por Categoria</CardTitle>
-          <CardDescription>Visualize a distribuição dos seus gastos.</CardDescription>
+          <CardDescription>Visualize a distribuição dos seus gastos no mês.</CardDescription>
         </CardHeader>
         <CardContent className="flex-grow flex items-center justify-center">
           <p className="text-muted-foreground">Nenhuma despesa registrada este mês.</p>
@@ -55,7 +57,7 @@ export default function CategoryPieChart() {
     <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle>Despesas por Categoria</CardTitle>
-        <CardDescription>Visualize a distribuição dos seus gastos.</CardDescription>
+        <CardDescription>Visualize a distribuição dos seus gastos no mês.</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <div className="flex flex-col items-center gap-4 sm:flex-row h-full">
