@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useTransactions } from '@/hooks/use-transactions';
 import { format } from 'date-fns';
@@ -8,15 +8,21 @@ import { ptBR } from 'date-fns/locale';
 import { getCategoryIcon } from '@/lib/icons';
 import { formatCurrency, cn } from '@/lib/utils';
 import { ArrowDown, ArrowUp } from 'lucide-react';
+import type { Transaction } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function RecentTransactions() {
   const { transactions } = useTransactions();
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
+  const [isClient, setIsClient] = useState(false);
 
-  const recentTransactions = React.useMemo(() => {
-    return transactions
+  useEffect(() => {
+    setIsClient(true);
+    const sorted = transactions
       .slice()
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5);
+    setRecentTransactions(sorted);
   }, [transactions]);
 
   return (
@@ -26,7 +32,20 @@ export default function RecentTransactions() {
         <CardDescription>Suas últimas 5 movimentações financeiras.</CardDescription>
       </CardHeader>
       <CardContent>
-        {recentTransactions.length > 0 ? (
+        {!isClient ? (
+           <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/4" />
+                </div>
+                <Skeleton className="h-5 w-20" />
+              </div>
+            ))}
+          </div>
+        ) : recentTransactions.length > 0 ? (
           <div className="space-y-4">
             {recentTransactions.map((t) => {
               const Icon = getCategoryIcon(t.category);
