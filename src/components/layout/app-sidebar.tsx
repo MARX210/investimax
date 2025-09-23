@@ -25,21 +25,17 @@ export default function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <Link href="/" passHref>
-              <SidebarMenuButton asChild isActive={pathname === '/'} tooltip="Dashboard">
-                <span>
-                  <LayoutDashboard />
-                  <span>Dashboard</span>
-                </span>
+              <SidebarMenuButton isActive={pathname === '/'} tooltip="Dashboard">
+                <LayoutDashboard />
+                <span>Dashboard</span>
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <Link href="/investimentos" passHref>
-              <SidebarMenuButton asChild isActive={pathname === '/investimentos'} tooltip="Investimentos">
-                <span>
-                  <Target />
-                  <span>Investimentos</span>
-                </span>
+              <SidebarMenuButton isActive={pathname === '/investimentos'} tooltip="Investimentos">
+                <Target />
+                <span>Investimentos</span>
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
