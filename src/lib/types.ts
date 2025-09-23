@@ -16,3 +16,10 @@ export type Investment = {
   yieldRate: number;
   startDate: string; // ISO 8601 format
 };
+
+export type User = {
+    id: string;
+    name: string;
+    email: string;
+    password?: string; // Should be handled securely on a backend
+}

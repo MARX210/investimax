@@ -2,11 +2,10 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
-import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
-import AppSidebar from '@/components/layout/app-sidebar';
-import Header from '@/components/layout/header';
 import { TransactionsProvider } from '@/hooks/use-transactions';
 import { InvestmentsProvider } from '@/hooks/use-investments';
+import { AuthProvider } from '@/hooks/use-auth';
+import AppContent from '@/components/layout/app-content';
 
 export const metadata: Metadata = {
   title: 'Investimax',
@@ -37,18 +36,16 @@ export default function RootLayout({
           'min-h-screen bg-background font-body antialiased'
         )}
       >
-        <TransactionsProvider>
-          <InvestmentsProvider>
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset className="flex flex-col">
-                <Header />
-                <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
-              </SidebarInset>
-            </SidebarProvider>
-            <Toaster />
-          </InvestmentsProvider>
-        </TransactionsProvider>
+        <AuthProvider>
+            <TransactionsProvider>
+            <InvestmentsProvider>
+                <AppContent>
+                    {children}
+                </AppContent>
+                <Toaster />
+            </InvestmentsProvider>
+            </TransactionsProvider>
+        </AuthProvider>
       </body>
     </html>
   );
