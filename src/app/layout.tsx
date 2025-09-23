@@ -9,8 +9,8 @@ import { TransactionsProvider } from '@/hooks/use-transactions';
 import { InvestmentsProvider } from '@/hooks/use-investments';
 
 export const metadata: Metadata = {
-  title: 'BolsoZen',
-  description: 'Seu gerente financeiro pessoal, simples e inteligente.',
+  title: 'Investimax',
+  description: 'Seu gerente de investimentos pessoal, simples e inteligente.',
 };
 
 export default function RootLayout({

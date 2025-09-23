@@ -17,7 +17,7 @@ export default function Logo({ small = false }: LogoProps) {
           small && 'text-primary'
         )}
       >
-        BolsoZen
+        Investimax
       </h1>
     </div>
   );
