@@ -7,7 +7,6 @@ import type { User } from './types';
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'your-fallback-super-secret-key-that-is-at-least-32-chars-long');
 const issuer = 'urn:investimax:issuer';
 const audience = 'urn:investimax:audience';
-const expiresAt = '2h';
 
 export async function getSession(): Promise<User | null> {
     const cookie = cookies().get('session')?.value;
