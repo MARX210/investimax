@@ -1,11 +1,13 @@
+'use server';
 import { db } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import * as jose from 'jose';
-import type { User } from '@/lib/types';
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'your-fallback-super-secret-key-that-is-at-least-32-chars-long');
+const issuer = 'urn:investimax:issuer';
+const audience = 'urn:investimax:audience';
 
 export async function POST(req: Request) {
   try {
@@ -36,8 +38,8 @@ export async function POST(req: Request) {
       .setProtectedHeader({ alg: 'HS256' })
       .setSubject(user.id)
       .setIssuedAt()
-      .setIssuer('urn:investimax:issuer')
-      .setAudience('urn:investimax:audience')
+      .setIssuer(issuer)
+      .setAudience(audience)
       .setExpirationTime('2h')
       .sign(secret);
       
