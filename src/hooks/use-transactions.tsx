@@ -57,7 +57,7 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
     fetchTransactions();
   }, [fetchTransactions]);
 
-  const addTransaction = useCallback(async (data: TransactionFormData) => {
+  const addTransaction = async (data: TransactionFormData) => {
     try {
       const { installments = 1, ...rest } = data;
 
@@ -94,9 +94,9 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error adding transaction:', error);
     }
-  }, [fetchTransactions]);
+  };
 
-  const updateTransaction = useCallback(async (id: string, data: TransactionFormData) => {
+  const updateTransaction = async (id: string, data: TransactionFormData) => {
     try {
       const response = await fetch(`/api/transactions/${id}`, {
         method: 'PUT',
@@ -108,19 +108,20 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error updating transaction:', error);
     }
-  }, [fetchTransactions]);
+  };
 
-  const deleteTransaction = useCallback(async (id: string) => {
+  const deleteTransaction = async (id: string) => {
     try {
       const response = await fetch(`/api/transactions/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete transaction');
-      setTransactions((prev) => prev.filter((t) => t.id !== id));
+      // Optimistic update is faster, but we will refetch for consistency
+      await fetchTransactions();
     } catch (error) {
       console.error('Error deleting transaction:', error);
     }
-  }, []);
+  };
 
   const contextValue = useMemo(
     () => ({

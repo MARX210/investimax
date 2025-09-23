@@ -80,7 +80,7 @@ export function InvestmentsProvider({ children }: { children: ReactNode }) {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete investment');
-      setInvestments(prev => prev.filter(t => t.id !== id));
+      await fetchInvestments();
     } catch (error) {
       console.error('Error deleting investment:', error);
     }
