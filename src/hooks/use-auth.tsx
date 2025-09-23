@@ -7,15 +7,12 @@ import { useRouter } from 'next/navigation';
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
   register: (data: Omit<User, 'id'>) => Promise<boolean>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// In a real app, this would be your database.
-const userStore: User[] = [];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -37,21 +34,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = (email: string, password: string): boolean => {
-    // This is a mock login. In a real app, you would make an API call to verify credentials.
-    // We are checking against the local userStore which is populated on successful registration.
-    const foundUser = userStore.find(u => u.email === email && u.password === password);
-    if (foundUser) {
-      const userToStore = { id: foundUser.id, name: foundUser.name, email: foundUser.email };
-      setUser(userToStore);
-      try {
-        localStorage.setItem('investimax-user', JSON.stringify(userToStore));
-      } catch (e) {
-        console.error("Failed to save user to localStorage", e);
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        console.error('Login failed');
+        return false;
       }
+
+      const loggedInUser = await response.json();
+      setUser(loggedInUser);
+      localStorage.setItem('investimax-user', JSON.stringify(loggedInUser));
       return true;
+    } catch (error) {
+      console.error('An error occurred during login:', error);
+      return false;
     }
-    return false;
   };
 
   const register = async (data: Omit<User, 'id' | 'password'> & { password: string }): Promise<boolean> => {
@@ -71,8 +74,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
       
-      // Temporarily add to local userStore for mock login to work right after
-      userStore.push({ ...data, id: `temp-${Date.now()}` });
       alert('Cadastro realizado com sucesso! Você já pode fazer o login.');
       return true;
 

@@ -28,9 +28,10 @@ export default function LoginPage() {
   const [activeTab, setActiveTab] = useState('login');
 
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(loginEmail, loginPassword)) {
+    const success = await login(loginEmail, loginPassword);
+    if (success) {
       router.push('/');
     } else {
       alert('Credenciais inválidas!');
@@ -43,6 +44,9 @@ export default function LoginPage() {
     if (success) {
       // Switch to login tab and pre-fill email for user convenience
       setLoginEmail(registerEmail);
+      setRegisterName('');
+      setRegisterEmail('');
+      setRegisterPassword('');
       setActiveTab('login');
     }
   };
