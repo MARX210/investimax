@@ -13,6 +13,7 @@ import {
   Briefcase,
   TrendingUp,
   Shapes,
+  Scale,
 } from 'lucide-react';
 
 const categoryIcons: Record<string, LucideIcon> = {

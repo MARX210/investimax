@@ -7,11 +7,12 @@ import MonthlySummaryChart from '@/components/dashboard/monthly-summary-chart';
 import CategoryPieChart from '@/components/dashboard/category-pie-chart';
 import RecentTransactions from '@/components/dashboard/recent-transactions';
 import SpendingAnalysisCard from '@/components/ai/spending-analysis-card';
-import { Landmark, ArrowUp, ArrowDown } from 'lucide-react';
+import { Landmark, ArrowUp, ArrowDown, Scale } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getMonth, getYear, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import BalanceCard from '@/components/dashboard/balance-card';
 
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
@@ -32,7 +33,7 @@ export default function DashboardPage() {
     });
   }, [transactions, selectedMonth, selectedYear]);
 
-  const { totalBalance, totalIncome, totalExpenses } = useMemo(() => {
+  const { totalBalance, totalIncome, totalExpenses, monthBalance } = useMemo(() => {
     const income = filteredTransactions
       .filter((t) => t.type === 'income')
       .reduce((acc, t) => acc + t.amount, 0);
@@ -40,7 +41,6 @@ export default function DashboardPage() {
       .filter((t) => t.type === 'expense')
       .reduce((acc, t) => acc + t.amount, 0);
     
-    // Calculate total balance based on all transactions up to the end of the selected month
     const balanceUpToMonth = transactions
         .filter(t => new Date(t.date) <= new Date(selectedYear, selectedMonth + 1, 0))
         .reduce((acc, t) => acc + (t.type === 'income' ? t.amount : -t.amount), 0);
@@ -49,6 +49,7 @@ export default function DashboardPage() {
       totalBalance: balanceUpToMonth,
       totalIncome: income,
       totalExpenses: expenses,
+      monthBalance: income - expenses,
     };
   }, [transactions, filteredTransactions, selectedMonth, selectedYear]);
 
@@ -87,9 +88,9 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <SummaryCard
-          title="Saldo Acumulado"
+          title="Saldo Total (até o mês)"
           value={totalBalance}
           icon={Landmark}
           iconColor="text-primary"
@@ -105,6 +106,11 @@ export default function DashboardPage() {
           value={totalExpenses}
           icon={ArrowDown}
           iconColor="text-red-500"
+        />
+        <BalanceCard
+          title="Balanço do Mês"
+          value={monthBalance}
+          icon={Scale}
         />
       </div>
 
