@@ -23,6 +23,7 @@ export const TRANSACTION_CATEGORIES = {
     'Educação',
     'Supermercado',
     'Contas',
+    'Fatura de Cartão',
     'Outros',
   ],
 };

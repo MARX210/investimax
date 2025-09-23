@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Shapes,
   Scale,
+  WalletCards,
 } from 'lucide-react';
 
 const categoryIcons: Record<string, LucideIcon> = {
@@ -27,6 +28,7 @@ const categoryIcons: Record<string, LucideIcon> = {
   Educação: GraduationCap,
   Supermercado: ShoppingCart,
   Contas: Receipt,
+  'Fatura de Cartão': WalletCards,
   // Income
   Salário: Briefcase,
   'Renda Extra': CircleDollarSign,
