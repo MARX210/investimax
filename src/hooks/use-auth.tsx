@@ -91,11 +91,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await fetch('/api/auth/logout');
     setUser(null);
     router.push('/login');
-  };
+  }, [router]);
 
   const contextValue = useMemo(() => ({
     user,
@@ -103,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     register,
     logout,
-  }), [user, isLoading, login, register, logout]);
+  }), [user, isLoading, logout]);
 
   return (
     <AuthContext.Provider value={contextValue}>

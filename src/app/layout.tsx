@@ -26,13 +26,13 @@ function AppLayout({
     if (!isLoading && !user && !isAuthPage) {
       router.push('/login');
     }
-  }, [isLoading, user, isAuthPage, router]);
+  }, [isLoading, user, isAuthPage, router, pathname]);
 
   if (isAuthPage) {
     return <>{children}</>;
   }
 
-  if (isLoading || !user) {
+  if (isLoading || (!user && !isAuthPage)) {
     return (
         <div className="flex h-screen w-full items-center justify-center">
             <p>Carregando...</p>

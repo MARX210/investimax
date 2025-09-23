@@ -22,7 +22,6 @@ export function InvestmentsProvider({ children }: { children: ReactNode }) {
 
   const fetchInvestments = useCallback(async () => {
     if (!user) {
-        setInvestments([]);
         setIsLoading(false);
         return;
     };
@@ -91,7 +90,7 @@ export function InvestmentsProvider({ children }: { children: ReactNode }) {
     updateInvestment,
     deleteInvestment,
     isLoading
-  }), [investments, isLoading]);
+  }), [investments, isLoading, addInvestment, updateInvestment, deleteInvestment]);
 
   return (
     <InvestmentsContext.Provider value={contextValue}>

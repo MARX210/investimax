@@ -33,7 +33,6 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
 
   const fetchTransactions = useCallback(async () => {
     if (!user) {
-        setTransactions([]);
         setIsLoading(false);
         return;
     };
@@ -47,7 +46,6 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
       setTransactions(data);
     } catch (error) {
       console.error('Error fetching transactions:', error);
-      // Handle error (e.g., show a toast notification)
     } finally {
       setIsLoading(false);
     }
@@ -57,30 +55,30 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
     fetchTransactions();
   }, [fetchTransactions]);
 
-  const addTransaction = async (data: TransactionFormData) => {
+  const addTransaction = useCallback(async (data: TransactionFormData) => {
     const { installments = 1, ...rest } = data;
 
-    // We can still handle installment logic on the client
-    // before sending individual transactions to the server.
     if (rest.type === 'expense' && installments > 1) {
       const newTransactionsData = [];
+      const baseAmount = rest.amount / installments;
       for (let i = 0; i < installments; i++) {
         newTransactionsData.push({
           ...rest,
           date: addMonths(new Date(rest.date), i).toISOString(),
-          amount: rest.amount / installments,
+          amount: baseAmount,
           description: `${rest.description} (${i + 1}/${installments})`,
         });
       }
       
-      // Send each transaction to the server
-      for (const transData of newTransactionsData) {
-         await fetch('/api/transactions', {
+      await Promise.all(
+        newTransactionsData.map(transData =>
+          fetch('/api/transactions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(transData),
-         });
-      }
+          })
+        )
+      );
 
     } else {
         await fetch('/api/transactions', {
@@ -90,11 +88,10 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
         });
     }
 
-    // Refetch transactions to get the latest state from the DB
     await fetchTransactions();
-  };
+  }, [fetchTransactions]);
 
-  const updateTransaction = async (id: string, data: TransactionFormData) => {
+  const updateTransaction = useCallback(async (id: string, data: TransactionFormData) => {
     try {
       const response = await fetch(`/api/transactions/${id}`, {
         method: 'PUT',
@@ -106,9 +103,9 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error updating transaction:', error);
     }
-  };
+  }, [fetchTransactions]);
 
-  const deleteTransaction = async (id: string) => {
+  const deleteTransaction = useCallback(async (id: string) => {
     try {
       const response = await fetch(`/api/transactions/${id}`, {
         method: 'DELETE',
@@ -118,7 +115,7 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error deleting transaction:', error);
     }
-  };
+  }, []);
 
   const contextValue = useMemo(
     () => ({
@@ -128,7 +125,7 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
       deleteTransaction,
       isLoading,
     }),
-    [transactions, isLoading]
+    [transactions, isLoading, addTransaction, updateTransaction, deleteTransaction]
   );
 
   return (
