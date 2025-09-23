@@ -23,6 +23,8 @@ export default function LoginPage() {
   const [registerName, setRegisterName] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
   const { login, register } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('login');
@@ -30,16 +32,17 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoggingIn(true);
     const success = await login(loginEmail, loginPassword);
-    if (success) {
-      router.push('/');
-    } else {
+    if (!success) {
       alert('Credenciais inválidas!');
     }
+    setIsLoggingIn(false);
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsRegistering(true);
     const success = await register({ name: registerName, email: registerEmail, password: registerPassword });
     if (success) {
       // Switch to login tab and pre-fill email for user convenience
@@ -49,6 +52,7 @@ export default function LoginPage() {
       setRegisterPassword('');
       setActiveTab('login');
     }
+    setIsRegistering(false);
   };
 
   return (
@@ -73,15 +77,17 @@ export default function LoginPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="login-email">Email</Label>
-                  <Input id="login-email" type="email" placeholder="seu@email.com" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required />
+                  <Input id="login-email" type="email" placeholder="seu@email.com" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required disabled={isLoggingIn} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="login-password">Senha</Label>
-                  <Input id="login-password" type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required />
+                  <Input id="login-password" type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required disabled={isLoggingIn} />
                 </div>
               </CardContent>
               <CardFooter>
-                <Button type="submit" className="w-full">Entrar</Button>
+                <Button type="submit" className="w-full" disabled={isLoggingIn}>
+                  {isLoggingIn ? 'Entrando...' : 'Entrar'}
+                </Button>
               </CardFooter>
             </Card>
           </form>
@@ -98,19 +104,21 @@ export default function LoginPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="register-name">Nome</Label>
-                  <Input id="register-name" placeholder="Seu Nome" value={registerName} onChange={(e) => setRegisterName(e.target.value)} required />
+                  <Input id="register-name" placeholder="Seu Nome" value={registerName} onChange={(e) => setRegisterName(e.target.value)} required disabled={isRegistering}/>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="register-email">Email</Label>
-                  <Input id="register-email" type="email" placeholder="seu@email.com" value={registerEmail} onChange={(e) => setRegisterEmail(e.target.value)} required />
+                  <Input id="register-email" type="email" placeholder="seu@email.com" value={registerEmail} onChange={(e) => setRegisterEmail(e.target.value)} required disabled={isRegistering}/>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="register-password">Senha</Label>
-                  <Input id="register-password" type="password" value={registerPassword} onChange={(e) => setRegisterPassword(e.target.value)} required />
+                  <Input id="register-password" type="password" value={registerPassword} onChange={(e) => setRegisterPassword(e.target.value)} required disabled={isRegistering}/>
                 </div>
               </CardContent>
               <CardFooter>
-                <Button type="submit" className="w-full">Criar Conta</Button>
+                <Button type="submit" className="w-full" disabled={isRegistering}>
+                    {isRegistering ? 'Criando...' : 'Criar Conta'}
+                </Button>
               </CardFooter>
             </Card>
           </form>

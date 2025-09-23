@@ -53,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error('Login failed');
         return false;
       }
+      
       // Instead of setting user, reload the page. The cookie is set,
       // and the useEffect on load will pick up the new session.
       window.location.href = '/'; 
