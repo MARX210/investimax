@@ -26,7 +26,7 @@ import { CalendarIcon, Repeat, WalletCards } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { TRANSACTION_CATEGORIES } from '@/lib/data';
+import { TRANSACTION_CATEGORIES, PAYMENT_METHODS } from '@/lib/data';
 import { Switch } from '@/components/ui/switch';
 import type { Transaction } from '@/lib/types';
 
@@ -36,6 +36,7 @@ const FormSchema = z.object({
   description: z.string().min(2, 'A descrição deve ter pelo menos 2 caracteres.'),
   date: z.date(),
   category: z.string().min(1, 'Selecione uma categoria.'),
+  paymentMethod: z.enum(['credit', 'debit', 'pix', 'cash', 'other']).optional(),
   isRecurring: z.boolean().optional(),
   installments: z.coerce.number().int().min(1).optional(),
 });
@@ -57,6 +58,7 @@ export default function TransactionForm({ onSave, onCancel, defaultValues }: Tra
       description: defaultValues?.description || '',
       date: defaultValues?.date ? new Date(defaultValues.date) : new Date(),
       category: defaultValues?.category || '',
+      paymentMethod: defaultValues?.paymentMethod || undefined,
       isRecurring: defaultValues?.isRecurring || false,
       installments: defaultValues?.description?.match(/\(\d+\/\d+\)/) ? 1 : 1, // Simplified for now
     },
@@ -140,6 +142,32 @@ export default function TransactionForm({ onSave, onCancel, defaultValues }: Tra
             </FormItem>
           )}
         />
+        {transactionType === 'expense' && (
+          <FormField
+            control={form.control}
+            name="paymentMethod"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Método de Pagamento</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um método" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.entries(PAYMENT_METHODS).map(([key, value]) => (
+                      <SelectItem key={key} value={key}>
+                        {value}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         <FormField
           control={form.control}
           name="date"

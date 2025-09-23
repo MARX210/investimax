@@ -6,4 +6,5 @@ export type Transaction = {
   category: string;
   date: string; // ISO 8601 format
   isRecurring?: boolean; // For income
+  paymentMethod?: 'credit' | 'debit' | 'pix' | 'cash' | 'other';
 };

@@ -23,6 +23,7 @@ import { useTransactions } from '@/hooks/use-transactions';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { getCategoryIcon } from '@/lib/icons';
+import { PAYMENT_METHODS } from '@/lib/data';
 import { formatCurrency, cn } from '@/lib/utils';
 import { ArrowDown, ArrowUp, MoreVertical, Trash2, Pencil } from 'lucide-react';
 import type { Transaction } from '@/lib/types';
@@ -69,6 +70,11 @@ export default function RecentTransactions() {
     setTransactionToDelete(null);
   };
 
+  const getPaymentMethodLabel = (methodKey?: keyof typeof PAYMENT_METHODS) => {
+    if (!methodKey) return null;
+    return PAYMENT_METHODS[methodKey] || null;
+  }
+
   return (
     <>
     <Card className="h-full">
@@ -95,6 +101,7 @@ export default function RecentTransactions() {
             {recentTransactions.map((t) => {
               const Icon = getCategoryIcon(t.category);
               const isIncome = t.type === 'income';
+              const paymentMethodLabel = getPaymentMethodLabel(t.paymentMethod as keyof typeof PAYMENT_METHODS);
 
               return (
                 <div key={t.id} className="flex items-center gap-4">
@@ -109,6 +116,7 @@ export default function RecentTransactions() {
                     <p className="truncate font-medium">{t.description}</p>
                     <p className="text-sm text-muted-foreground">
                       {isClient ? format(new Date(t.date), "dd 'de' MMM", { locale: ptBR }) : ''}
+                      {paymentMethodLabel && ` • ${paymentMethodLabel}`}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

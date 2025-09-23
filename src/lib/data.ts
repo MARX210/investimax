@@ -20,6 +20,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     description: 'Almoço no restaurante',
     category: 'Alimentação',
     date: subDays(now, 1).toISOString(),
+    paymentMethod: 'debit',
   },
   {
     id: '3',
@@ -28,6 +29,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     description: 'Compras de supermercado',
     category: 'Supermercado',
     date: subDays(now, 3).toISOString(),
+    paymentMethod: 'credit',
   },
   {
     id: '4',
@@ -36,6 +38,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     description: 'Uber para o trabalho',
     category: 'Transporte',
     date: subDays(now, 4).toISOString(),
+    paymentMethod: 'pix',
   },
   {
     id: '5',
@@ -52,6 +55,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     description: 'Camisa nova',
     category: 'Vestuário',
     date: subDays(now, 6).toISOString(),
+    paymentMethod: 'credit',
   },
     {
     id: '7',
@@ -60,6 +64,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     description: 'Aluguel',
     category: 'Moradia',
     date: subMonths(subDays(now, 5),1).toISOString(),
+    paymentMethod: 'pix',
   },
   {
     id: '8',
@@ -87,3 +92,11 @@ export const TRANSACTION_CATEGORIES = {
     'Outros',
   ],
 };
+
+export const PAYMENT_METHODS = {
+    credit: 'Cartão de Crédito',
+    debit: 'Cartão de Débito',
+    pix: 'PIX',
+    cash: 'Dinheiro',
+    other: 'Outro'
+}
