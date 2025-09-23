@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   user: User | null;
+  setUser: (user: User | null) => void;
   isLoading: boolean;
+  setIsLoading: (isLoading: boolean) => void;
   login: (email: string, password: string) => Promise<boolean>;
   register: (data: Omit<User, 'id'> & { password: string }) => Promise<boolean>;
   logout: () => void;
@@ -14,33 +16,12 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-async function checkSession(): Promise<User | null> {
-    try {
-        const response = await fetch('/api/auth/session');
-        if (response.ok) {
-            return await response.json();
-        }
-        return null;
-    } catch {
-        return null;
-    }
-}
-
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-
-  useEffect(() => {
-    checkSession().then(sessionUser => {
-        setUser(sessionUser);
-        setIsLoading(false);
-    });
-  }, []);
-
+  
   const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -59,8 +40,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('An error occurred during login:', error);
       return false;
-    } finally {
-        setIsLoading(false);
     }
   };
 
@@ -99,7 +78,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const contextValue = useMemo(() => ({
     user,
+    setUser,
     isLoading,
+    setIsLoading,
     login,
     register,
     logout,

@@ -10,23 +10,43 @@ import AppSidebar from '@/components/layout/app-sidebar';
 import Header from '@/components/layout/header';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import type { User } from '@/lib/types';
+
+async function checkSession(): Promise<User | null> {
+    try {
+        const response = await fetch('/api/auth/session');
+        if (response.ok) {
+            return await response.json();
+        }
+        return null;
+    } catch {
+        return null;
+    }
+}
 
 function AppLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { user, isLoading } = useAuth();
+  const { user, setUser, isLoading, setIsLoading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
 
   const isAuthPage = pathname === '/login';
 
   useEffect(() => {
+    checkSession().then(sessionUser => {
+        setUser(sessionUser);
+        setIsLoading(false);
+    });
+  }, [setUser, setIsLoading]);
+
+  useEffect(() => {
     if (!isLoading && !user && !isAuthPage) {
       router.push('/login');
     }
-  }, [isLoading, user, isAuthPage, router, pathname]);
+  }, [isLoading, user, isAuthPage, router]);
 
   if (isAuthPage) {
     return <>{children}</>;

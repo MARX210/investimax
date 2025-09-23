@@ -33,10 +33,10 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
 
   const fetchTransactions = useCallback(async () => {
     if (!user) {
-        setIsLoading(false);
-        setTransactions([]); // Clear data if no user
-        return;
-    };
+      setTransactions([]);
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     try {
       const response = await fetch('/api/transactions');
@@ -47,7 +47,7 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
       setTransactions(data);
     } catch (error) {
       console.error('Error fetching transactions:', error);
-      setTransactions([]); // Clear data on error
+      setTransactions([]);
     } finally {
       setIsLoading(false);
     }
