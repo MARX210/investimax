@@ -39,8 +39,8 @@ export default function InvestmentsPage() {
   const [investmentToDelete, setInvestmentToDelete] = useState<string | null>(null);
   
   const { totalInvested, averageYield } = useMemo(() => {
-    const total = investments.reduce((acc, inv) => acc + inv.amount, 0);
-    const weightedYieldSum = investments.reduce((acc, inv) => acc + (inv.amount * inv.yieldRate), 0);
+    const total = investments.reduce((acc, inv) => acc + (inv.amount || 0), 0);
+    const weightedYieldSum = investments.reduce((acc, inv) => acc + ((inv.amount || 0) * (inv.yieldRate || 0)), 0);
     const avg = total > 0 ? weightedYieldSum / total : 0;
     return {
         totalInvested: total,
@@ -125,7 +125,7 @@ export default function InvestmentsPage() {
                     </div>
                      <div>
                         <p className="font-medium text-muted-foreground text-sm">Rentabilidade</p>
-                        <p className="font-semibold">{inv.yieldRate.toFixed(2)}% a.a.</p>
+                        <p className="font-semibold">{(inv.yieldRate || 0).toFixed(2)}% a.a.</p>
                     </div>
                   </div>
                   <DropdownMenu>
