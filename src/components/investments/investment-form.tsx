@@ -20,14 +20,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { INVESTMENT_TYPES } from '@/lib/data';
 import type { Investment } from '@/lib/types';
+import { DatePicker } from '../ui/date-picker';
 
 const FormSchema = z.object({
   type: z.string().min(2, 'O tipo deve ter pelo menos 2 caracteres.'),
@@ -114,35 +113,11 @@ export default function InvestmentForm({ onSave, onCancel, defaultValues }: Inve
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>Data de Início</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={'outline'}
-                      className={cn(
-                        'w-full pl-3 text-left font-normal',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, 'PPP', { locale: ptBR })
-                      ) : (
-                        <span>Escolha uma data</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <DatePicker
+                date={field.value}
+                setDate={field.onChange}
+                disabled={(date) => date < new Date('1900-01-01')}
+              />
               <FormMessage />
             </FormItem>
           )}
