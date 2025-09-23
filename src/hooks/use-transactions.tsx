@@ -1,68 +1,131 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useMemo,
+  useEffect,
+  useCallback,
+} from 'react';
 import type { Transaction } from '@/lib/types';
-import { MOCK_TRANSACTIONS } from '@/lib/data';
 import type { TransactionFormData } from '@/components/transactions/transaction-form';
 import { addMonths } from 'date-fns';
+import { useAuth } from './use-auth';
 
 interface TransactionsContextType {
   transactions: Transaction[];
-  addTransaction: (data: TransactionFormData) => void;
-  updateTransaction: (id: string, data: TransactionFormData) => void;
-  deleteTransaction: (id: string) => void;
+  addTransaction: (data: TransactionFormData) => Promise<void>;
+  updateTransaction: (id: string, data: TransactionFormData) => Promise<void>;
+  deleteTransaction: (id: string) => Promise<void>;
+  isLoading: boolean;
 }
 
-const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
+const TransactionsContext = createContext<TransactionsContextType | undefined>(
+  undefined
+);
 
 export function TransactionsProvider({ children }: { children: ReactNode }) {
-  const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS);
+  const { user } = useAuth();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const addTransaction = (data: TransactionFormData) => {
+  const fetchTransactions = useCallback(async () => {
+    if (!user) return;
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/transactions');
+      if (!response.ok) {
+        throw new Error('Failed to fetch transactions');
+      }
+      const data = await response.json();
+      setTransactions(data);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      // Handle error (e.g., show a toast notification)
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
+
+  const addTransaction = async (data: TransactionFormData) => {
     const { installments = 1, ...rest } = data;
-    
+
+    // We can still handle installment logic on the client
+    // before sending individual transactions to the server.
     if (rest.type === 'expense' && installments > 1) {
-      const newTransactions: Transaction[] = [];
+      const newTransactionsData = [];
       for (let i = 0; i < installments; i++) {
-        newTransactions.push({
-          id: `${Date.now()}-${Math.random()}-${i}`,
+        newTransactionsData.push({
           ...rest,
           date: addMonths(new Date(rest.date), i).toISOString(),
           amount: rest.amount / installments,
           description: `${rest.description} (${i + 1}/${installments})`,
         });
       }
-      setTransactions(prev => [...prev, ...newTransactions]);
+      
+      // Send each transaction to the server
+      for (const transData of newTransactionsData) {
+         await fetch('/api/transactions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(transData),
+         });
+      }
+
     } else {
-      const newTransaction: Transaction = {
-        id: `${Date.now()}-${Math.random()}`,
-        ...rest,
-        date: rest.date.toISOString(),
-      };
-      setTransactions(prev => [...prev, newTransaction]);
+        await fetch('/api/transactions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...data, date: data.date.toISOString() }),
+        });
+    }
+
+    // Refetch transactions to get the latest state from the DB
+    await fetchTransactions();
+  };
+
+  const updateTransaction = async (id: string, data: TransactionFormData) => {
+    try {
+      const response = await fetch(`/api/transactions/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, date: data.date.toISOString() }),
+      });
+      if (!response.ok) throw new Error('Failed to update transaction');
+      await fetchTransactions();
+    } catch (error) {
+      console.error('Error updating transaction:', error);
     }
   };
 
-  const updateTransaction = (id: string, data: TransactionFormData) => {
-    const updatedTransaction: Transaction = {
-      id,
-      ...data,
-      date: data.date.toISOString(),
-    };
-    setTransactions(prev => prev.map(t => t.id === id ? updatedTransaction : t));
+  const deleteTransaction = async (id: string) => {
+    try {
+      const response = await fetch(`/api/transactions/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete transaction');
+      setTransactions((prev) => prev.filter((t) => t.id !== id));
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+    }
   };
 
-  const deleteTransaction = (id: string) => {
-    setTransactions(prev => prev.filter(t => t.id !== id));
-  };
-
-
-  const contextValue = useMemo(() => ({
-    transactions,
-    addTransaction,
-    updateTransaction,
-    deleteTransaction,
-  }), [transactions]);
+  const contextValue = useMemo(
+    () => ({
+      transactions,
+      addTransaction,
+      updateTransaction,
+      deleteTransaction,
+      isLoading,
+    }),
+    [transactions, isLoading, fetchTransactions]
+  );
 
   return (
     <TransactionsContext.Provider value={contextValue}>
@@ -74,7 +137,9 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
 export function useTransactions() {
   const context = useContext(TransactionsContext);
   if (context === undefined) {
-    throw new Error('useTransactions must be used within a TransactionsProvider');
+    throw new Error(
+      'useTransactions must be used within a TransactionsProvider'
+    );
   }
   return context;
 }

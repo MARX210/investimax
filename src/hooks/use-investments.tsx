@@ -1,51 +1,93 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import { createContext, useContext, useState, ReactNode, useMemo, useEffect, useCallback } from 'react';
 import type { Investment } from '@/lib/types';
-import { MOCK_INVESTMENTS } from '@/lib/data';
 import type { InvestmentFormData } from '@/components/investments/investment-form';
+import { useAuth } from './use-auth';
 
 interface InvestmentsContextType {
   investments: Investment[];
-  addInvestment: (data: InvestmentFormData) => void;
-  updateInvestment: (id: string, data: InvestmentFormData) => void;
-  deleteInvestment: (id: string) => void;
+  addInvestment: (data: InvestmentFormData) => Promise<void>;
+  updateInvestment: (id: string, data: InvestmentFormData) => Promise<void>;
+  deleteInvestment: (id: string) => Promise<void>;
+  isLoading: boolean;
 }
 
 const InvestmentsContext = createContext<InvestmentsContextType | undefined>(undefined);
 
 export function InvestmentsProvider({ children }: { children: ReactNode }) {
-  const [investments, setInvestments] = useState<Investment[]>(MOCK_INVESTMENTS);
+  const { user } = useAuth();
+  const [investments, setInvestments] = useState<Investment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const addInvestment = (data: InvestmentFormData) => {
-    const newInvestment: Investment = {
-      id: `${Date.now()}-${Math.random()}`,
-      ...data,
-      startDate: data.startDate.toISOString(),
-    };
-    setInvestments(prev => [...prev, newInvestment]);
+  const fetchInvestments = useCallback(async () => {
+    if (!user) return;
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/investments');
+      if (!response.ok) {
+        throw new Error('Failed to fetch investments');
+      }
+      const data = await response.json();
+      setInvestments(data);
+    } catch (error) {
+      console.error('Error fetching investments:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchInvestments();
+  }, [fetchInvestments]);
+
+  const addInvestment = async (data: InvestmentFormData) => {
+    try {
+      const response = await fetch('/api/investments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, startDate: data.startDate.toISOString() }),
+      });
+      if (!response.ok) throw new Error('Failed to add investment');
+      await fetchInvestments();
+    } catch (error) {
+      console.error('Error adding investment:', error);
+    }
   };
 
-  const updateInvestment = (id: string, data: InvestmentFormData) => {
-    const updatedInvestment: Investment = {
-      id,
-      ...data,
-      startDate: data.startDate.toISOString(),
-    };
-    setInvestments(prev => prev.map(t => t.id === id ? updatedInvestment : t));
+  const updateInvestment = async (id: string, data: InvestmentFormData) => {
+    try {
+      const response = await fetch(`/api/investments/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, startDate: data.startDate.toISOString() }),
+      });
+      if (!response.ok) throw new Error('Failed to update investment');
+      await fetchInvestments();
+    } catch (error) {
+      console.error('Error updating investment:', error);
+    }
   };
 
-  const deleteInvestment = (id: string) => {
-    setInvestments(prev => prev.filter(t => t.id !== id));
+  const deleteInvestment = async (id: string) => {
+    try {
+      const response = await fetch(`/api/investments/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete investment');
+      setInvestments(prev => prev.filter(t => t.id !== id));
+    } catch (error) {
+      console.error('Error deleting investment:', error);
+    }
   };
-
 
   const contextValue = useMemo(() => ({
     investments,
     addInvestment,
     updateInvestment,
     deleteInvestment,
-  }), [investments]);
+    isLoading
+  }), [investments, isLoading, fetchInvestments]);
 
   return (
     <InvestmentsContext.Provider value={contextValue}>

@@ -84,7 +84,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  const logout = () => {
+  const logout = async () => {
+    try {
+        await fetch('/api/auth/logout');
+    } catch (e) {
+        console.error("Logout request failed", e);
+    }
     setUser(null);
     try {
       localStorage.removeItem('investimax-user');
