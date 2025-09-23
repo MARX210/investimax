@@ -1,16 +1,61 @@
-import type { Metadata } from 'next';
+'use client';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { TransactionsProvider } from '@/hooks/use-transactions';
 import { InvestmentsProvider } from '@/hooks/use-investments';
-import { AuthProvider } from '@/hooks/use-auth';
-import AppContent from '@/components/layout/app-content';
+import { AuthProvider, useAuth } from '@/hooks/use-auth';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import AppSidebar from '@/components/layout/app-sidebar';
+import Header from '@/components/layout/header';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
-export const metadata: Metadata = {
-  title: 'BolsoZen',
-  description: 'Seu gerente de investimentos pessoal, simples e inteligente.',
-};
+function AppLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const { user, isLoading } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const isAuthPage = pathname === '/login';
+
+  useEffect(() => {
+    if (!isLoading && !user && !isAuthPage) {
+      router.push('/login');
+    }
+  }, [isLoading, user, isAuthPage, router]);
+
+  if (isAuthPage) {
+    return <>{children}</>;
+  }
+
+  if (isLoading || !user) {
+    return (
+        <div className="flex h-screen w-full items-center justify-center">
+            <p>Carregando...</p>
+        </div>
+    );
+  }
+
+  return (
+    <SidebarProvider>
+      <TransactionsProvider>
+        <InvestmentsProvider>
+            <AppSidebar />
+            <SidebarInset>
+            <Header />
+            <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+            </SidebarInset>
+            <Toaster />
+        </InvestmentsProvider>
+      </TransactionsProvider>
+    </SidebarProvider>
+  );
+}
+
 
 export default function RootLayout({
   children,
@@ -37,14 +82,7 @@ export default function RootLayout({
         )}
       >
         <AuthProvider>
-            <TransactionsProvider>
-            <InvestmentsProvider>
-                <AppContent>
-                    {children}
-                </AppContent>
-                <Toaster />
-            </InvestmentsProvider>
-            </TransactionsProvider>
+            <AppLayout>{children}</AppLayout>
         </AuthProvider>
       </body>
     </html>

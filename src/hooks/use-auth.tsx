@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useMemo, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useMemo, useEffect, useCallback } from 'react';
 import type { User } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 
@@ -14,7 +14,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Helper function to fetch session from the server
 async function checkSession(): Promise<User | null> {
     try {
         const response = await fetch('/api/auth/session');
@@ -34,7 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    // Check session on initial load
     checkSession().then(sessionUser => {
         setUser(sessionUser);
         setIsLoading(false);
@@ -42,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
+    setIsLoading(true);
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -60,6 +59,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('An error occurred during login:', error);
       return false;
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -102,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     register,
     logout,
-  }), [user, isLoading]);
+  }), [user, isLoading, login, register, logout]);
 
   return (
     <AuthContext.Provider value={contextValue}>
