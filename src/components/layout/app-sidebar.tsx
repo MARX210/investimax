@@ -10,7 +10,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Target } from 'lucide-react';
+import { LayoutDashboard, Target, ArrowRightLeft } from 'lucide-react';
 import Logo from '@/components/logo';
 
 export default function AppSidebar() {
@@ -28,6 +28,14 @@ export default function AppSidebar() {
               <SidebarMenuButton isActive={pathname === '/'} tooltip="Dashboard">
                 <LayoutDashboard />
                 <span>Dashboard</span>
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <Link href="/transacoes" passHref>
+              <SidebarMenuButton isActive={pathname === '/transacoes'} tooltip="Transações">
+                <ArrowRightLeft />
+                <span>Transações</span>
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
