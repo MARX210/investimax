@@ -25,6 +25,8 @@ export default function LoginPage() {
   const [registerPassword, setRegisterPassword] = useState('');
   const { login, register } = useAuth();
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState('login');
+
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,12 +37,13 @@ export default function LoginPage() {
     }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    register({ name: registerName, email: registerEmail, password: registerPassword });
-    // Log in the user directly after registration
-    if (login(registerEmail, registerPassword)) {
-        router.push('/');
+    const success = await register({ name: registerName, email: registerEmail, password: registerPassword });
+    if (success) {
+      // Switch to login tab and pre-fill email for user convenience
+      setLoginEmail(registerEmail);
+      setActiveTab('login');
     }
   };
 
@@ -49,7 +52,7 @@ export default function LoginPage() {
         <div className='absolute top-8 left-8'>
             <Logo />
         </div>
-      <Tabs defaultValue="login" className="w-full max-w-sm">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-sm">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="login">Entrar</TabsTrigger>
           <TabsTrigger value="register">Cadastrar</TabsTrigger>

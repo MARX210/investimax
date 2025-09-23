@@ -7,13 +7,12 @@ import { useRouter } from 'next/navigation';
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => boolean;
-  register: (data: Omit<User, 'id'>) => void;
+  register: (data: Omit<User, 'id'>) => Promise<boolean>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// A simple in-memory store for users for demonstration purposes.
 // In a real app, this would be your database.
 const userStore: User[] = [];
 
@@ -36,6 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [router]);
 
   const login = (email: string, password: string): boolean => {
+    // TODO: Implement login API call
+    console.warn('Login is currently mocked. Implement API call.');
     // In a real app, you would hash the password and check against the database.
     const foundUser = userStore.find(u => u.email === email && u.password === password);
     if (foundUser) {
@@ -47,15 +48,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
-  const register = (data: Omit<User, 'id'>) => {
-    const newUser: User = {
-      id: `${Date.now()}`,
-      ...data
-    };
-    userStore.push(newUser);
-    // In a real app, you would save the new user to your database.
-    console.log('New user registered:', newUser);
-    console.log('Current user store:', userStore);
+  const register = async (data: Omit<User, 'id' | 'password'> & { password: string }): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Registration failed:', errorData);
+        alert(`Erro no cadastro: ${errorData}`);
+        return false;
+      }
+
+      // const newUser = await response.json();
+      // console.log('New user registered via API:', newUser);
+      
+      // Temporarily add to local userStore for mock login to work right after
+      userStore.push({ ...data, id: 'temp-id' });
+      alert('Cadastro realizado com sucesso! Você já pode fazer o login.');
+      return true;
+
+    } catch (error) {
+      console.error('An error occurred during registration:', error);
+      alert('Ocorreu um erro durante o cadastro. Tente novamente.');
+      return false;
+    }
   };
   
   const logout = () => {
