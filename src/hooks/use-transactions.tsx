@@ -135,7 +135,7 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
       deleteTransaction,
       isLoading,
     }),
-    [transactions, isLoading]
+    [transactions, isLoading, fetchTransactions]
   );
 
   return (
