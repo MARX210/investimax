@@ -23,6 +23,7 @@ export function InvestmentsProvider({ children }: { children: ReactNode }) {
   const fetchInvestments = useCallback(async () => {
     if (!user) {
         setIsLoading(false);
+        setInvestments([]); // Clear data if no user
         return;
     };
     setIsLoading(true);
@@ -35,6 +36,7 @@ export function InvestmentsProvider({ children }: { children: ReactNode }) {
       setInvestments(data);
     } catch (error) {
       console.error('Error fetching investments:', error);
+      setInvestments([]); // Clear data on error
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +92,7 @@ export function InvestmentsProvider({ children }: { children: ReactNode }) {
     updateInvestment,
     deleteInvestment,
     isLoading
-  }), [investments, isLoading]);
+  }), [investments, isLoading, addInvestment, updateInvestment, deleteInvestment]);
 
   return (
     <InvestmentsContext.Provider value={contextValue}>

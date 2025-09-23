@@ -34,6 +34,7 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
   const fetchTransactions = useCallback(async () => {
     if (!user) {
         setIsLoading(false);
+        setTransactions([]); // Clear data if no user
         return;
     };
     setIsLoading(true);
@@ -46,6 +47,7 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
       setTransactions(data);
     } catch (error) {
       console.error('Error fetching transactions:', error);
+      setTransactions([]); // Clear data on error
     } finally {
       setIsLoading(false);
     }
@@ -56,39 +58,42 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
   }, [fetchTransactions]);
 
   const addTransaction = useCallback(async (data: TransactionFormData) => {
-    const { installments = 1, ...rest } = data;
+    try {
+      const { installments = 1, ...rest } = data;
 
-    if (rest.type === 'expense' && installments > 1) {
-      const newTransactionsData = [];
-      const baseAmount = rest.amount / installments;
-      for (let i = 0; i < installments; i++) {
-        newTransactionsData.push({
-          ...rest,
-          date: addMonths(new Date(rest.date), i).toISOString(),
-          amount: baseAmount,
-          description: `${rest.description} (${i + 1}/${installments})`,
-        });
+      if (rest.type === 'expense' && installments > 1) {
+        const newTransactionsData = [];
+        const baseAmount = rest.amount / installments;
+        for (let i = 0; i < installments; i++) {
+          newTransactionsData.push({
+            ...rest,
+            date: addMonths(new Date(rest.date), i).toISOString(),
+            amount: baseAmount,
+            description: `${rest.description} (${i + 1}/${installments})`,
+          });
+        }
+        
+        await Promise.all(
+          newTransactionsData.map(transData =>
+            fetch('/api/transactions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(transData),
+            })
+          )
+        );
+
+      } else {
+          await fetch('/api/transactions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ...data, date: data.date.toISOString() }),
+          });
       }
-      
-      await Promise.all(
-        newTransactionsData.map(transData =>
-          fetch('/api/transactions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(transData),
-          })
-        )
-      );
-
-    } else {
-        await fetch('/api/transactions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...data, date: data.date.toISOString() }),
-        });
+      await fetchTransactions();
+    } catch (error) {
+      console.error('Error adding transaction:', error);
     }
-
-    await fetchTransactions();
   }, [fetchTransactions]);
 
   const updateTransaction = useCallback(async (id: string, data: TransactionFormData) => {
