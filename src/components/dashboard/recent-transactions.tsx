@@ -2,30 +2,75 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import { useTransactions } from '@/hooks/use-transactions';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { getCategoryIcon } from '@/lib/icons';
 import { formatCurrency, cn } from '@/lib/utils';
-import { ArrowDown, ArrowUp } from 'lucide-react';
+import { ArrowDown, ArrowUp, MoreVertical, Trash2, Pencil } from 'lucide-react';
 import type { Transaction } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import EditTransactionSheet from '@/components/transactions/edit-transaction-sheet';
 
 export default function RecentTransactions() {
-  const { transactions } = useTransactions();
+  const { transactions, deleteTransaction } = useTransactions();
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [isClient, setIsClient] = useState(false);
+  const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null);
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
+
 
   useEffect(() => {
     setIsClient(true);
+  }, []);
+
+  useEffect(() => {
     const sorted = transactions
       .slice()
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5);
     setRecentTransactions(sorted);
   }, [transactions]);
+  
+  const handleEdit = (transaction: Transaction) => {
+    setTransactionToEdit(transaction);
+    setIsEditSheetOpen(true);
+  };
+
+  const handleDeleteRequest = (id: string) => {
+    setTransactionToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (transactionToDelete) {
+      deleteTransaction(transactionToDelete);
+    }
+    setIsDeleteDialogOpen(false);
+    setTransactionToDelete(null);
+  };
 
   return (
+    <>
     <Card className="h-full">
       <CardHeader>
         <CardTitle>Transações Recentes</CardTitle>
@@ -63,17 +108,36 @@ export default function RecentTransactions() {
                   <div className="flex-1 min-w-0">
                     <p className="truncate font-medium">{t.description}</p>
                     <p className="text-sm text-muted-foreground">
-                      {format(new Date(t.date), "dd 'de' MMM", { locale: ptBR })}
+                      {isClient ? format(new Date(t.date), "dd 'de' MMM", { locale: ptBR }) : ''}
                     </p>
                   </div>
-                  <div
-                    className={cn(
-                      'font-semibold',
-                      isIncome ? 'text-green-500' : 'text-foreground'
-                    )}
-                  >
-                    {isIncome ? '+' : '-'}
-                    {formatCurrency(t.amount)}
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={cn(
+                        'font-semibold',
+                        isIncome ? 'text-green-500' : 'text-foreground'
+                      )}
+                    >
+                      {isIncome ? '+' : '-'}
+                      {formatCurrency(t.amount)}
+                    </div>
+                     <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEdit(t)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDeleteRequest(t.id)} className="text-red-500">
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               );
@@ -86,5 +150,29 @@ export default function RecentTransactions() {
         )}
       </CardContent>
     </Card>
+
+    {transactionToEdit && (
+        <EditTransactionSheet 
+            isOpen={isEditSheetOpen}
+            setIsOpen={setIsEditSheetOpen}
+            transaction={transactionToEdit}
+        />
+    )}
+
+    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Essa ação não pode ser desfeita. Isso excluirá permanentemente sua transação.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

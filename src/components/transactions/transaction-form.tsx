@@ -28,6 +28,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { TRANSACTION_CATEGORIES } from '@/lib/data';
 import { Switch } from '@/components/ui/switch';
+import type { Transaction } from '@/lib/types';
 
 const FormSchema = z.object({
   type: z.enum(['income', 'expense']),
@@ -44,23 +45,26 @@ export type TransactionFormData = z.infer<typeof FormSchema>;
 type TransactionFormProps = {
   onSave: (data: TransactionFormData) => void;
   onCancel: () => void;
+  defaultValues?: Partial<Transaction>;
 };
 
-export default function TransactionForm({ onSave, onCancel }: TransactionFormProps) {
+export default function TransactionForm({ onSave, onCancel, defaultValues }: TransactionFormProps) {
   const form = useForm<TransactionFormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      type: 'expense',
-      amount: 0,
-      description: '',
-      date: new Date(),
-      category: '',
-      isRecurring: false,
-      installments: 1,
+      type: defaultValues?.type || 'expense',
+      amount: defaultValues?.amount || 0,
+      description: defaultValues?.description || '',
+      date: defaultValues?.date ? new Date(defaultValues.date) : new Date(),
+      category: defaultValues?.category || '',
+      isRecurring: defaultValues?.isRecurring || false,
+      installments: defaultValues?.description?.match(/\(\d+\/\d+\)/) ? 1 : 1, // Simplified for now
     },
   });
 
   const transactionType = form.watch('type');
+  const isInstallment = !!defaultValues?.description?.match(/\(\d+\/\d+\)/);
+
 
   return (
     <Form {...form}>
@@ -201,7 +205,7 @@ export default function TransactionForm({ onSave, onCancel }: TransactionFormPro
                   <FormLabel className="flex items-center gap-2"><WalletCards /> Compra Parcelada</FormLabel>
                 </div>
                 <FormControl>
-                  <Input type="number" min="1" className="w-20" {...field} />
+                  <Input type="number" min="1" className="w-20" {...field} disabled={isInstallment} />
                 </FormControl>
               </FormItem>
             )}

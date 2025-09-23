@@ -9,6 +9,8 @@ import { addMonths } from 'date-fns';
 interface TransactionsContextType {
   transactions: Transaction[];
   addTransaction: (data: TransactionFormData) => void;
+  updateTransaction: (id: string, data: TransactionFormData) => void;
+  deleteTransaction: (id: string) => void;
 }
 
 const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
@@ -41,9 +43,25 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateTransaction = (id: string, data: TransactionFormData) => {
+    const updatedTransaction: Transaction = {
+      id,
+      ...data,
+      date: data.date.toISOString(),
+    };
+    setTransactions(prev => prev.map(t => t.id === id ? updatedTransaction : t));
+  };
+
+  const deleteTransaction = (id: string) => {
+    setTransactions(prev => prev.filter(t => t.id !== id));
+  };
+
+
   const contextValue = useMemo(() => ({
     transactions,
     addTransaction,
+    updateTransaction,
+    deleteTransaction,
   }), [transactions]);
 
   return (
