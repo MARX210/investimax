@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Sidebar,
@@ -23,24 +24,24 @@ export default function AppSidebar() {
       <SidebarContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              href="/"
-              isActive={pathname === '/'}
-              tooltip="Dashboard"
-            >
-              <LayoutDashboard />
-              <span>Dashboard</span>
-            </SidebarMenuButton>
+            <Link href="/" passHref>
+              <SidebarMenuButton asChild isActive={pathname === '/'} tooltip="Dashboard">
+                <>
+                  <LayoutDashboard />
+                  <span>Dashboard</span>
+                </>
+              </SidebarMenuButton>
+            </Link>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              href="/investimentos"
-              isActive={pathname === '/investimentos'}
-              tooltip="Investimentos"
-            >
-              <Target />
-              <span>Investimentos</span>
-            </SidebarMenuButton>
+            <Link href="/investimentos" passHref>
+              <SidebarMenuButton asChild isActive={pathname === '/investimentos'} tooltip="Investimentos">
+                <>
+                  <Target />
+                  <span>Investimentos</span>
+                </>
+              </SidebarMenuButton>
+            </Link>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
