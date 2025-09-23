@@ -14,24 +14,31 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Helper function to fetch session from the server
+async function checkSession(): Promise<User | null> {
+    try {
+        const response = await fetch('/api/auth/session');
+        if (response.ok) {
+            return await response.json();
+        }
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is logged in from a previous session (e.g., localStorage)
-    try {
-      const storedUser = localStorage.getItem('investimax-user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-    } catch (e) {
-      console.error("Failed to parse user from localStorage", e);
-      localStorage.removeItem('investimax-user');
-    } finally {
-      setIsLoading(false);
-    }
+    // Check session on initial load
+    checkSession().then(sessionUser => {
+        setUser(sessionUser);
+        setIsLoading(false);
+    });
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -46,10 +53,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error('Login failed');
         return false;
       }
-
-      const loggedInUser = await response.json();
-      setUser(loggedInUser);
-      localStorage.setItem('investimax-user', JSON.stringify(loggedInUser));
+      // Instead of setting user, reload the page. The cookie is set,
+      // and the useEffect on load will pick up the new session.
+      window.location.href = '/'; 
       return true;
     } catch (error) {
       console.error('An error occurred during login:', error);
@@ -85,18 +91,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
   
   const logout = async () => {
-    try {
-        await fetch('/api/auth/logout');
-    } catch (e) {
-        console.error("Logout request failed", e);
-    }
-    setUser(null);
-    try {
-      localStorage.removeItem('investimax-user');
-    } catch(e) {
-        console.error("Failed to remove user from localStorage", e);
-    }
-    router.push('/login');
+    await fetch('/api/auth/logout');
+    // Reload to clear all state and be redirected by AppContent logic
+    window.location.href = '/login';
   };
 
   const contextValue = useMemo(() => ({
