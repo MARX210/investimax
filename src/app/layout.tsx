@@ -8,7 +8,7 @@ import { AuthProvider } from '@/hooks/use-auth';
 import AppContent from '@/components/layout/app-content';
 
 export const metadata: Metadata = {
-  title: 'Investimax',
+  title: 'BolsoZen',
   description: 'Seu gerente de investimentos pessoal, simples e inteligente.',
 };
 

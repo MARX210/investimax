@@ -1,23 +1,30 @@
 'use client';
 
 import { useAuth } from '@/hooks/use-auth';
-import { usePathname } from 'next/navigation';
-import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
+import { usePathname, useRouter } from 'next/navigation';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/layout/app-sidebar';
 import Header from '@/components/layout/header';
+import { useEffect } from 'react';
 
 export default function AppContent({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
 
   const isAuthPage = pathname === '/login';
+
+  useEffect(() => {
+    if (!isLoading && !user && !isAuthPage) {
+      router.push('/login');
+    }
+  }, [isLoading, user, isAuthPage, router]);
 
   if (isAuthPage) {
     return <>{children}</>;
   }
 
-  if (!user) {
-    // You can return a loading spinner or a blank page while the auth state is being determined.
+  if (isLoading || !user) {
     return (
         <div className="flex h-screen w-full items-center justify-center">
             <p>Carregando...</p>
@@ -28,7 +35,7 @@ export default function AppContent({ children }: { children: React.ReactNode }) 
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="flex flex-col">
+      <SidebarInset>
         <Header />
         <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
       </SidebarInset>

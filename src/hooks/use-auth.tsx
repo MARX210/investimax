@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   user: User | null;
+  isLoading: boolean;
   login: (email: string, password: string) => boolean;
   register: (data: Omit<User, 'id'>) => Promise<boolean>;
   logout: () => void;
@@ -18,31 +19,36 @@ const userStore: User[] = [];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     // Check if user is logged in from a previous session (e.g., localStorage)
-    const storedUser = localStorage.getItem('investimax-user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-       // If no user is stored and we are not on the login page, redirect.
-       // This handles the case where the user opens the app for the first time.
-      if (window.location.pathname !== '/login') {
-        router.push('/login');
+    try {
+      const storedUser = localStorage.getItem('investimax-user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
       }
+    } catch (e) {
+      console.error("Failed to parse user from localStorage", e);
+      localStorage.removeItem('investimax-user');
+    } finally {
+      setIsLoading(false);
     }
-  }, [router]);
+  }, []);
 
   const login = (email: string, password: string): boolean => {
-    // TODO: Implement login API call
-    console.warn('Login is currently mocked. Implement API call.');
-    // In a real app, you would hash the password and check against the database.
+    // This is a mock login. In a real app, you would make an API call to verify credentials.
+    // We are checking against the local userStore which is populated on successful registration.
     const foundUser = userStore.find(u => u.email === email && u.password === password);
     if (foundUser) {
       const userToStore = { id: foundUser.id, name: foundUser.name, email: foundUser.email };
       setUser(userToStore);
-      localStorage.setItem('investimax-user', JSON.stringify(userToStore));
+      try {
+        localStorage.setItem('investimax-user', JSON.stringify(userToStore));
+      } catch (e) {
+        console.error("Failed to save user to localStorage", e);
+      }
       return true;
     }
     return false;
@@ -64,12 +70,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         alert(`Erro no cadastro: ${errorData}`);
         return false;
       }
-
-      // const newUser = await response.json();
-      // console.log('New user registered via API:', newUser);
       
       // Temporarily add to local userStore for mock login to work right after
-      userStore.push({ ...data, id: 'temp-id' });
+      userStore.push({ ...data, id: `temp-${Date.now()}` });
       alert('Cadastro realizado com sucesso! Você já pode fazer o login.');
       return true;
 
@@ -82,16 +85,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('investimax-user');
+    try {
+      localStorage.removeItem('investimax-user');
+    } catch(e) {
+        console.error("Failed to remove user from localStorage", e);
+    }
     router.push('/login');
   };
 
   const contextValue = useMemo(() => ({
     user,
+    isLoading,
     login,
     register,
     logout,
-  }), [user]);
+  }), [user, isLoading]);
 
   return (
     <AuthContext.Provider value={contextValue}>
