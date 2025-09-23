@@ -115,7 +115,9 @@ export default function InvestmentsPage() {
                   <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2 items-center">
                     <div>
                         <p className="font-medium">{inv.type}</p>
-                        <p className="text-sm text-muted-foreground">Início em {format(new Date(inv.startDate), "dd/MM/yyyy", { locale: ptBR })}</p>
+                        {inv.startDate && (
+                          <p className="text-sm text-muted-foreground">Início em {format(new Date(inv.startDate), "dd/MM/yyyy", { locale: ptBR })}</p>
+                        )}
                     </div>
                      <div>
                         <p className="font-medium text-muted-foreground text-sm">Valor Aplicado</p>
