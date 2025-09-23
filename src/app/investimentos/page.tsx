@@ -107,25 +107,31 @@ export default function InvestmentsPage() {
         <CardContent>
           <div className="space-y-4">
             {investments.length > 0 ? (
-              investments.map((inv) => (
+              investments.map((inv) => {
+                const dailyYield = ((inv.amount || 0) * ((inv.yieldRate || 0) / 100)) / 252; // Assuming 252 business days
+                return (
                 <div key={inv.id} className="flex items-center gap-4 rounded-md border p-4">
                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                       <TrendingUp className="h-5 w-5" />
                   </div>
-                  <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2 items-center">
-                    <div>
+                  <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
+                    <div className="md:col-span-1">
                         <p className="font-medium">{inv.type}</p>
                         {inv.startDate && (
                           <p className="text-sm text-muted-foreground">Início em {format(new Date(inv.startDate), "dd/MM/yyyy", { locale: ptBR })}</p>
                         )}
                     </div>
-                     <div>
+                     <div className="md:col-span-1">
                         <p className="font-medium text-muted-foreground text-sm">Valor Aplicado</p>
                         <p className="font-semibold">{formatCurrency(inv.amount)}</p>
                     </div>
-                     <div>
+                     <div className="md:col-span-1">
                         <p className="font-medium text-muted-foreground text-sm">Rentabilidade</p>
                         <p className="font-semibold">{(inv.yieldRate || 0).toFixed(2)}% a.a.</p>
+                    </div>
+                    <div className="md:col-span-1">
+                        <p className="font-medium text-muted-foreground text-sm">Rendimento/dia</p>
+                        <p className="font-semibold text-green-600">{formatCurrency(dailyYield)}</p>
                     </div>
                   </div>
                   <DropdownMenu>
@@ -146,7 +152,7 @@ export default function InvestmentsPage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-              ))
+              )})
             ) : (
               <div className="flex h-24 items-center justify-center rounded-md border border-dashed">
                 <p className="text-sm text-muted-foreground">Nenhum investimento registrado.</p>
