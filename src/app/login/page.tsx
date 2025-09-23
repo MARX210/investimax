@@ -38,8 +38,8 @@ export default function LoginPage() {
       router.push('/');
     } else {
       alert('Credenciais inválidas!');
+      setIsLoggingIn(false);
     }
-    setIsLoggingIn(false);
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -47,6 +47,7 @@ export default function LoginPage() {
     setIsRegistering(true);
     const success = await register({ name: registerName, email: registerEmail, password: registerPassword });
     if (success) {
+      alert('Cadastro realizado com sucesso! Você já pode fazer o login.');
       // Switch to login tab and pre-fill email for user convenience
       setLoginEmail(registerEmail);
       setRegisterName('');
