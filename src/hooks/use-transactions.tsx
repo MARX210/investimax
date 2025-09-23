@@ -43,8 +43,13 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
       if (!response.ok) {
         throw new Error('Failed to fetch transactions');
       }
-      const data = await response.json();
-      setTransactions(data);
+      const data: Transaction[] = await response.json();
+      // Ensure amount is a number
+      const formattedData = data.map(t => ({
+        ...t,
+        amount: typeof t.amount === 'string' ? parseFloat(t.amount) : t.amount
+      }));
+      setTransactions(formattedData);
     } catch (error) {
       console.error('Error fetching transactions:', error);
       setTransactions([]);
@@ -116,7 +121,6 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete transaction');
-      // Optimistic update is faster, but we will refetch for consistency
       await fetchTransactions();
     } catch (error) {
       console.error('Error deleting transaction:', error);
@@ -131,7 +135,7 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
       deleteTransaction,
       isLoading,
     }),
-    [transactions, isLoading, addTransaction, updateTransaction, deleteTransaction]
+    [transactions, isLoading]
   );
 
   return (

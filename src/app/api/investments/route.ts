@@ -31,7 +31,9 @@ export async function POST(req: Request) {
 
   try {
     const body: Omit<Investment, 'id'> = await req.json();
-    const { type, amount, yieldRate, startDate } = body;
+    const { type, startDate } = body;
+    const amount = parseFloat(body.amount as any);
+    const yieldRate = parseFloat(body.yieldRate as any);
     
     if (!type || !amount || !yieldRate || !startDate) {
         return new NextResponse('Missing required fields', { status: 400 });

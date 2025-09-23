@@ -31,7 +31,8 @@ export async function POST(req: Request) {
 
   try {
     const body: Omit<Transaction, 'id'> = await req.json();
-    const { type, amount, description, category, date, paymentMethod, isRecurring } = body;
+    const { type, description, category, date, paymentMethod, isRecurring } = body;
+    const amount = parseFloat(body.amount as any);
     
     if (!type || !amount || !description || !category || !date) {
         return new NextResponse('Missing required fields', { status: 400 });

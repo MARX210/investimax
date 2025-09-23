@@ -32,8 +32,14 @@ export function InvestmentsProvider({ children }: { children: ReactNode }) {
       if (!response.ok) {
         throw new Error('Failed to fetch investments');
       }
-      const data = await response.json();
-      setInvestments(data);
+      const data: Investment[] = await response.json();
+      // Ensure amount and yieldRate are numbers
+      const formattedData = data.map(inv => ({
+        ...inv,
+        amount: typeof inv.amount === 'string' ? parseFloat(inv.amount) : inv.amount,
+        yieldRate: typeof inv.yieldRate === 'string' ? parseFloat(inv.yieldRate) : inv.yieldRate,
+      }));
+      setInvestments(formattedData);
     } catch (error) {
       console.error('Error fetching investments:', error);
       setInvestments([]);
@@ -92,7 +98,7 @@ export function InvestmentsProvider({ children }: { children: ReactNode }) {
     updateInvestment,
     deleteInvestment,
     isLoading
-  }), [investments, isLoading, addInvestment, updateInvestment, deleteInvestment]);
+  }), [investments, isLoading]);
 
   return (
     <InvestmentsContext.Provider value={contextValue}>
