@@ -90,7 +90,7 @@ export function InvestmentsProvider({ children }: { children: ReactNode }) {
     updateInvestment,
     deleteInvestment,
     isLoading
-  }), [investments, isLoading, addInvestment, updateInvestment, deleteInvestment]);
+  }), [investments, isLoading]);
 
   return (
     <InvestmentsContext.Provider value={contextValue}>
