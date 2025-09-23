@@ -8,7 +8,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (data: Omit<User, 'id'>) => Promise<boolean>;
+  register: (data: Omit<User, 'id'> & { password: string }) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -54,9 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
       
-      // Instead of setting user, reload the page. The cookie is set,
-      // and the useEffect on load will pick up the new session.
-      window.location.href = '/'; 
+      const loggedInUser = await response.json();
+      setUser(loggedInUser);
       return true;
     } catch (error) {
       console.error('An error occurred during login:', error);
@@ -64,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (data: Omit<User, 'id' | 'password'> & { password: string }): Promise<boolean> => {
+  const register = async (data: Omit<User, 'id'> & { password: string }): Promise<boolean> => {
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -93,8 +92,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   const logout = async () => {
     await fetch('/api/auth/logout');
-    // Reload to clear all state and be redirected by AppContent logic
-    window.location.href = '/login';
+    setUser(null);
+    router.push('/login');
   };
 
   const contextValue = useMemo(() => ({

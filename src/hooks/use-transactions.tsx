@@ -32,7 +32,11 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchTransactions = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+        setTransactions([]);
+        setIsLoading(false);
+        return;
+    };
     setIsLoading(true);
     try {
       const response = await fetch('/api/transactions');
@@ -124,7 +128,7 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
       deleteTransaction,
       isLoading,
     }),
-    [transactions, isLoading, fetchTransactions]
+    [transactions, isLoading]
   );
 
   return (

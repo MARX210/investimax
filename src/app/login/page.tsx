@@ -34,7 +34,9 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoggingIn(true);
     const success = await login(loginEmail, loginPassword);
-    if (!success) {
+    if (success) {
+      router.push('/');
+    } else {
       alert('Credenciais inválidas!');
     }
     setIsLoggingIn(false);

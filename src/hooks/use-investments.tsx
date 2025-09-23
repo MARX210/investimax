@@ -21,7 +21,11 @@ export function InvestmentsProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchInvestments = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+        setInvestments([]);
+        setIsLoading(false);
+        return;
+    };
     setIsLoading(true);
     try {
       const response = await fetch('/api/investments');
@@ -87,7 +91,7 @@ export function InvestmentsProvider({ children }: { children: ReactNode }) {
     updateInvestment,
     deleteInvestment,
     isLoading
-  }), [investments, isLoading, fetchInvestments]);
+  }), [investments, isLoading]);
 
   return (
     <InvestmentsContext.Provider value={contextValue}>
