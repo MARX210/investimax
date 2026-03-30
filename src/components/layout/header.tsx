@@ -1,3 +1,4 @@
+
 'use client';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import AddTransactionSheet from '@/components/transactions/add-transaction-sheet';
@@ -15,6 +16,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { LogOut, User as UserIcon, Settings, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import ProfileDialog from '../profile/profile-dialog';
+import { ModeToggle } from '../mode-toggle';
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -36,6 +38,7 @@ export default function Header() {
       
       <div className="flex items-center gap-2 sm:gap-4">
         <AddTransactionSheet />
+        <ModeToggle />
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

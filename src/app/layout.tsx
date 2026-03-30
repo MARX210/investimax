@@ -1,3 +1,4 @@
+
 'use client';
 import './globals.css';
 import { cn } from '@/lib/utils';
@@ -11,6 +12,7 @@ import Header from '@/components/layout/header';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import type { User } from '@/lib/types';
+import { ThemeProvider } from '@/components/theme-provider';
 
 async function checkSession(): Promise<User | null> {
     try {
@@ -83,7 +85,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -98,12 +100,19 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          'min-h-screen bg-background font-body antialiased'
+          'min-h-screen bg-background font-body antialiased transition-colors duration-300'
         )}
       >
-        <AuthProvider>
-            <AppLayout>{children}</AppLayout>
-        </AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+              <AppLayout>{children}</AppLayout>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
