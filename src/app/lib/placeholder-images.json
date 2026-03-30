@@ -1,0 +1,11 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "login-bg",
+      "description": "Fundo tecnológico e financeiro abstrato para tela de login",
+      "imageUrl": "https://picsum.photos/seed/finance/1920/1080",
+      "imageHint": "finance technology"
+    }
+  ]
+}
