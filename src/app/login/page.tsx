@@ -19,6 +19,7 @@ import Logo from '@/components/logo';
 import { useRouter } from 'next/navigation';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Image from 'next/image';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const [loginEmail, setLoginEmail] = useState('');
@@ -26,6 +27,10 @@ export default function LoginPage() {
   const [registerName, setRegisterName] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
+  
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const { login, register } = useAuth();
@@ -123,15 +128,25 @@ export default function LoginPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="login-password">Senha</Label>
-                    <Input 
-                      id="login-password" 
-                      type="password" 
-                      className="bg-white/50 border-white/30"
-                      value={loginPassword} 
-                      onChange={(e) => setLoginPassword(e.target.value)} 
-                      required 
-                      disabled={isLoggingIn} 
-                    />
+                    <div className="relative">
+                      <Input 
+                        id="login-password" 
+                        type={showLoginPassword ? "text" : "password"} 
+                        className="bg-white/50 border-white/30 pr-10"
+                        value={loginPassword} 
+                        onChange={(e) => setLoginPassword(e.target.value)} 
+                        required 
+                        disabled={isLoggingIn} 
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowLoginPassword(!showLoginPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        tabIndex={-1}
+                      >
+                        {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
                 </CardContent>
                 <CardFooter>
@@ -180,15 +195,25 @@ export default function LoginPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="register-password">Crie uma Senha</Label>
-                    <Input 
-                      id="register-password" 
-                      type="password" 
-                      className="bg-white/50 border-white/30"
-                      value={registerPassword} 
-                      onChange={(e) => setRegisterPassword(e.target.value)} 
-                      required 
-                      disabled={isRegistering}
-                    />
+                    <div className="relative">
+                      <Input 
+                        id="register-password" 
+                        type={showRegisterPassword ? "text" : "password"} 
+                        className="bg-white/50 border-white/30 pr-10"
+                        value={registerPassword} 
+                        onChange={(e) => setRegisterPassword(e.target.value)} 
+                        required 
+                        disabled={isRegistering}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        tabIndex={-1}
+                      >
+                        {showRegisterPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
                 </CardContent>
                 <CardFooter>
