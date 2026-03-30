@@ -44,7 +44,6 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
         throw new Error('Failed to fetch transactions');
       }
       const data: Transaction[] = await response.json();
-      // Ensure amount is a number
       const formattedData = data.map(t => ({
         ...t,
         amount: typeof t.amount === 'string' ? parseFloat(t.amount) : t.amount
@@ -64,17 +63,23 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
 
   const addTransaction = async (data: TransactionFormData) => {
     try {
-      const { installments = 1, ...rest } = data;
+      const { installments = 1, currentInstallment = 1, ...rest } = data;
 
-      if (rest.type === 'expense' && installments > 1) {
+      if (rest.type === 'expense' && rest.paymentMethod === 'credit' && installments > 1) {
         const newTransactionsData = [];
-        const baseAmount = rest.amount / installments;
-        for (let i = 0; i < installments; i++) {
+        // Se o usuário diz que o valor de R$ 1000 é o total da compra, dividimos.
+        // Se o usuário diz que R$ 1000 é a parcela, usamos o valor cheio.
+        // Aqui assumimos que o valor inserido é o valor de CADA parcela para facilitar.
+        const baseAmount = rest.amount;
+        
+        // Loop da parcela atual até a última
+        for (let i = currentInstallment; i <= installments; i++) {
+          const monthsToAdd = i - currentInstallment;
           newTransactionsData.push({
             ...rest,
-            date: addMonths(new Date(rest.date), i).toISOString(),
+            date: addMonths(new Date(rest.date), monthsToAdd).toISOString(),
             amount: baseAmount,
-            description: `${rest.description} (${i + 1}/${installments})`,
+            description: `${rest.description} (${i}/${installments})`,
           });
         }
         
@@ -135,7 +140,7 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
       deleteTransaction,
       isLoading,
     }),
-    [transactions, isLoading, fetchTransactions]
+    [transactions, isLoading]
   );
 
   return (

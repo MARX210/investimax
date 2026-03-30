@@ -20,11 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Repeat, WalletCards } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 import { TRANSACTION_CATEGORIES, PAYMENT_METHODS } from '@/lib/data';
 import { Switch } from '@/components/ui/switch';
 import type { Transaction } from '@/lib/types';
 import { DatePicker } from '../ui/date-picker';
+import { CreditCard, CalendarDays, tag, FileText, Banknote } from 'lucide-react';
 
 const FormSchema = z.object({
   type: z.enum(['income', 'expense']),
@@ -35,6 +36,7 @@ const FormSchema = z.object({
   paymentMethod: z.enum(['credit', 'debit', 'pix', 'cash', 'other']).optional(),
   isRecurring: z.boolean().optional(),
   installments: z.coerce.number().int().min(1).optional(),
+  currentInstallment: z.coerce.number().int().min(1).optional(),
 });
 
 export type TransactionFormData = z.infer<typeof FormSchema>;
@@ -54,166 +56,214 @@ export default function TransactionForm({ onSave, onCancel, defaultValues }: Tra
       description: defaultValues?.description || '',
       date: defaultValues?.date ? new Date(defaultValues.date) : new Date(),
       category: defaultValues?.category || '',
-      paymentMethod: defaultValues?.paymentMethod || undefined,
+      paymentMethod: defaultValues?.paymentMethod || 'pix',
       isRecurring: defaultValues?.isRecurring || false,
-      installments: defaultValues?.description?.match(/\(\d+\/\d+\)/) ? 1 : 1, // Simplified for now
+      installments: 1,
+      currentInstallment: 1,
     },
   });
 
   const transactionType = form.watch('type');
-  const isInstallment = !!defaultValues?.description?.match(/\(\d+\/\d+\)/);
-
+  const paymentMethod = form.watch('paymentMethod');
+  const installments = form.watch('installments') || 1;
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSave)} className="space-y-6 p-1">
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo de Transação</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="expense">Despesa</SelectItem>
-                  <SelectItem value="income">Receita</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descrição</FormLabel>
-              <FormControl>
-                <Input placeholder="Ex: Almoço, Salário" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Valor</FormLabel>
-              <FormControl>
-                <Input type="number" placeholder="0,00" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Categoria</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma categoria" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {TRANSACTION_CATEGORIES[transactionType].map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        {transactionType === 'expense' && (
+        {/* Seção Principal: O Quê e Quanto */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-primary font-semibold">
+            <Banknote className="h-4 w-4" />
+            <span>Dados Básicos</span>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="expense">Despesa</SelectItem>
+                      <SelectItem value="income">Receita</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Valor (R$)</FormLabel>
+                  <FormControl>
+                    <Input type="number" step="0.01" placeholder="0,00" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <FormField
             control={form.control}
-            name="paymentMethod"
+            name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Método de Pagamento</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um método" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {Object.entries(PAYMENT_METHODS).map(([key, value]) => (
-                      <SelectItem key={key} value={key}>
-                        {value}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormLabel>Descrição</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ex: Almoço, Salário, Internet" {...field} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        )}
-        <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Data</FormLabel>
-              <DatePicker
-                date={field.value}
-                setDate={field.onChange}
-                disabled={(date) => date < new Date('1900-01-01')}
+        </div>
+
+        <Separator />
+
+        {/* Seção Detalhes: Categoria e Data */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-primary font-semibold">
+            <CalendarDays className="h-4 w-4" />
+            <span>Classificação e Data</span>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categoria</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {TRANSACTION_CATEGORIES[transactionType].map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Data</FormLabel>
+                  <DatePicker date={field.value} setDate={field.onChange} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Seção Pagamento e Parcelas */}
+        <div className="space-y-4 bg-muted/30 p-4 rounded-lg">
+          <div className="flex items-center gap-2 text-primary font-semibold">
+            <CreditCard className="h-4 w-4" />
+            <span>Pagamento</span>
+          </div>
+          
+          {transactionType === 'expense' ? (
+            <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="paymentMethod"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Método</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.entries(PAYMENT_METHODS).map(([key, value]) => (
+                          <SelectItem key={key} value={key}>
+                            {value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <FormMessage />
-            </FormItem>
+
+              {paymentMethod === 'credit' && (
+                <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <FormField
+                    control={form.control}
+                    name="installments"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Total de Parcelas</FormLabel>
+                        <FormControl>
+                          <Input type="number" min="1" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {installments > 1 && (
+                    <FormField
+                      control={form.control}
+                      name="currentInstallment"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Começar da nº</FormLabel>
+                          <FormControl>
+                            <Input type="number" min="1" max={installments} {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <FormField
+              control={form.control}
+              name="isRecurring"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border bg-background p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Receita Recorrente</FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           )}
-        />
-        {transactionType === 'income' && (
-          <FormField
-            control={form.control}
-            name="isRecurring"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                <div className="space-y-0.5">
-                  <FormLabel className="flex items-center gap-2"><Repeat />Receita Recorrente</FormLabel>
-                </div>
-                <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        )}
-        {transactionType === 'expense' && (
-          <FormField
-            control={form.control}
-            name="installments"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                 <div className="space-y-0.5">
-                  <FormLabel className="flex items-center gap-2"><WalletCards /> Compra Parcelada</FormLabel>
-                </div>
-                <FormControl>
-                  <Input type="number" min="1" className="w-20" {...field} disabled={isInstallment} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        )}
+        </div>
+
         <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
-            <Button type="submit">Salvar Transação</Button>
+          <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
+          <Button type="submit" className="px-8">Salvar</Button>
         </div>
       </form>
     </Form>
