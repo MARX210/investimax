@@ -8,13 +8,13 @@ type LogoProps = {
 export default function Logo({ small = false }: LogoProps) {
   return (
     <div className="flex items-center gap-2 p-2 group-data-[collapsible=icon]:justify-center">
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg">
         <Wallet className="h-5 w-5" />
       </div>
       <h1
         className={cn(
           'font-bold text-xl tracking-tight transition-opacity duration-200 group-data-[collapsible=icon]:opacity-0',
-          small ? 'text-primary/90' : 'text-white'
+          small ? 'text-primary' : 'text-sidebar-foreground'
         )}
       >
         Investimax
