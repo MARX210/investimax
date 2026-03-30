@@ -6,7 +6,6 @@ import SummaryCard from '@/components/dashboard/summary-card';
 import MonthlySummaryChart from '@/components/dashboard/monthly-summary-chart';
 import CategoryPieChart from '@/components/dashboard/category-pie-chart';
 import RecentTransactions from '@/components/dashboard/recent-transactions';
-import SpendingAnalysisCard from '@/components/ai/spending-analysis-card';
 import { Landmark, ArrowUp, ArrowDown, Scale } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -127,13 +126,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-5">
-        <div className="lg:col-span-3 h-full">
-          <RecentTransactions transactions={filteredTransactions} />
-        </div>
-        <div className="lg:col-span-2 h-full">
-          <SpendingAnalysisCard transactions={filteredTransactions}/>
-        </div>
+      <div className="w-full">
+        <RecentTransactions transactions={filteredTransactions} />
       </div>
     </div>
   );

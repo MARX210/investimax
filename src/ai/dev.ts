@@ -1,4 +1,4 @@
 import { config } from 'dotenv';
 config();
 
-import '@/ai/flows/spending-insights-flow.ts';
+// AI flows are currently disabled
