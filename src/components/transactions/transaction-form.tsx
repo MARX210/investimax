@@ -25,7 +25,7 @@ import { TRANSACTION_CATEGORIES, PAYMENT_METHODS } from '@/lib/data';
 import { Switch } from '@/components/ui/switch';
 import type { Transaction } from '@/lib/types';
 import { DatePicker } from '../ui/date-picker';
-import { CreditCard, CalendarDays, tag, FileText, Banknote } from 'lucide-react';
+import { CreditCard, CalendarDays, FileText, Banknote } from 'lucide-react';
 
 const FormSchema = z.object({
   type: z.enum(['income', 'expense']),
@@ -76,7 +76,7 @@ export default function TransactionForm({ onSave, onCancel, defaultValues }: Tra
             <Banknote className="h-4 w-4" />
             <span>Dados Básicos</span>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="type"
@@ -135,7 +135,7 @@ export default function TransactionForm({ onSave, onCancel, defaultValues }: Tra
             <CalendarDays className="h-4 w-4" />
             <span>Classificação e Data</span>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="category"
@@ -217,7 +217,7 @@ export default function TransactionForm({ onSave, onCancel, defaultValues }: Tra
                     name="installments"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Total de Parcelas</FormLabel>
+                        <FormLabel>Parcelas</FormLabel>
                         <FormControl>
                           <Input type="number" min="1" {...field} />
                         </FormControl>
@@ -262,8 +262,8 @@ export default function TransactionForm({ onSave, onCancel, defaultValues }: Tra
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
-          <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" className="px-8">Salvar</Button>
+          <Button type="button" variant="ghost" onClick={onCancel} className="flex-1 sm:flex-none">Cancelar</Button>
+          <Button type="submit" className="flex-1 sm:flex-none sm:px-8">Salvar</Button>
         </div>
       </form>
     </Form>

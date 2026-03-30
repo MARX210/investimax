@@ -50,19 +50,21 @@ export function DatePicker({ date, setDate, ...props }: DatePickerProps) {
           <Button
             variant={'outline'}
             className={cn(
-              'w-full justify-start text-left font-normal',
+              'w-full justify-start text-left font-normal h-10',
               !date && 'text-muted-foreground'
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? (
-              format(date, 'PPP', { locale: ptBR })
-            ) : (
-              <span>Escolha uma data</span>
-            )}
+            <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+            <span className="truncate">
+              {date ? (
+                format(date, 'PPP', { locale: ptBR })
+              ) : (
+                <span>Escolha uma data</span>
+              )}
+            </span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0">
+        <PopoverContent className="w-auto p-0" align="start">
           {calendar}
         </PopoverContent>
       </Popover>
@@ -75,23 +77,35 @@ export function DatePicker({ date, setDate, ...props }: DatePickerProps) {
         <Button
           variant={'outline'}
           className={cn(
-            'w-full justify-start text-left font-normal',
+            'w-full justify-start text-left font-normal h-10',
             !date && 'text-muted-foreground'
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? (
-            format(date, 'PPP', { locale: ptBR })
-          ) : (
-            <span>Escolha uma data</span>
-          )}
+          <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+          <span className="truncate">
+            {date ? (
+              format(date, 'PPP', { locale: ptBR })
+            ) : (
+              <span>Escolha uma data</span>
+            )}
+          </span>
         </Button>
       </DrawerTrigger>
       <DrawerContent>
-        <DrawerHeader>
+        <DrawerHeader className="text-left border-b pb-4">
             <DrawerTitle>Selecione uma data</DrawerTitle>
         </DrawerHeader>
-        <div className="p-4">{React.cloneElement(calendar, { numberOfMonths: 2 })}</div>
+        <div className="p-4 flex justify-center overflow-x-auto">
+          {/* On mobile drawer, one month is better to avoid horizontal scrolling issues */}
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={handleDateSelect}
+            locale={ptBR}
+            numberOfMonths={1}
+            {...props}
+          />
+        </div>
       </DrawerContent>
     </Drawer>
   );

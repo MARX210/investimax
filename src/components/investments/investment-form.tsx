@@ -20,10 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CalendarIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { INVESTMENT_TYPES } from '@/lib/data';
 import type { Investment } from '@/lib/types';
 import { DatePicker } from '../ui/date-picker';
@@ -94,38 +90,40 @@ export default function InvestmentForm({ onSave, onCancel, defaultValues }: Inve
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="yieldRate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Rentabilidade Anual (%)</FormLabel>
-              <FormControl>
-                <Input type="number" placeholder="10.75" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="startDate"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Data de Início</FormLabel>
-              <DatePicker
-                date={field.value}
-                setDate={field.onChange}
-                disabled={(date) => date < new Date('1900-01-01')}
-              />
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="yieldRate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Rentabilidade Anual (%)</FormLabel>
+                <FormControl>
+                  <Input type="number" placeholder="10.75" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="startDate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Data de Início</FormLabel>
+                <DatePicker
+                  date={field.value}
+                  setDate={field.onChange}
+                  disabled={(date) => date < new Date('1900-01-01')}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
-            <Button type="submit">Salvar Investimento</Button>
+            <Button type="button" variant="ghost" onClick={onCancel} className="flex-1 sm:flex-none">Cancelar</Button>
+            <Button type="submit" className="flex-1 sm:flex-none">Salvar</Button>
         </div>
       </form>
     </Form>
