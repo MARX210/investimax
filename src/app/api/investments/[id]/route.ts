@@ -14,15 +14,15 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
   try {
     const body: Omit<Investment, 'id'> = await req.json();
-    const { type, amount, yieldRate, startDate } = body;
+    const { type, amount, yieldRate, yieldPeriod, startDate, maturityDate } = body;
 
-     if (!type || !amount || !yieldRate || !startDate) {
+     if (!type || amount === undefined || yieldRate === undefined || !startDate || !yieldPeriod) {
         return new NextResponse('Missing required fields', { status: 400 });
     }
     
     const { rows: updatedInvestment } = await db.query(
-      'UPDATE investments SET type = $1, amount = $2, yield_rate = $3, start_date = $4 WHERE id = $5 AND user_id = $6 RETURNING *',
-      [type, amount, yieldRate, startDate, id, user.id]
+      'UPDATE investments SET type = $1, amount = $2, yield_rate = $3, yield_period = $4, start_date = $5, maturity_date = $6 WHERE id = $7 AND user_id = $8 RETURNING *',
+      [type, amount, yieldRate, yieldPeriod, startDate, maturityDate || null, id, user.id]
     );
 
     if (updatedInvestment.length === 0) {

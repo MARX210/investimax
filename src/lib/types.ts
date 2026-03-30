@@ -14,7 +14,9 @@ export type Investment = {
   type: string;
   amount: number;
   yieldRate: number;
+  yieldPeriod: 'annual' | 'monthly';
   startDate: string; // ISO 8601 format
+  maturityDate?: string; // ISO 8601 format
 };
 
 export type User = {

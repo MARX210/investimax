@@ -30,19 +30,20 @@ export function InvestmentsProvider({ children }: { children: ReactNode }) {
     try {
       const response = await fetch('/api/investments');
       if (!response.ok) {
-        console.warn('Não foi possível carregar os investimentos. Verifique a conexão com o banco de dados.');
+        console.warn('Não foi possível carregar os investimentos.');
         setInvestments([]);
         return;
       }
       const data = await response.json();
       
-      // Mapeia os dados do banco de dados (snake_case) para o frontend (camelCase)
       const formattedData: Investment[] = data.map((inv: any) => ({
         id: inv.id,
         type: inv.type,
         amount: typeof inv.amount === 'string' ? parseFloat(inv.amount) : (inv.amount || 0),
         yieldRate: typeof inv.yield_rate === 'string' ? parseFloat(inv.yield_rate) : (inv.yield_rate || 0),
+        yieldPeriod: inv.yield_period || 'annual',
         startDate: inv.start_date,
+        maturityDate: inv.maturity_date,
       }));
       
       setInvestments(formattedData);
@@ -63,7 +64,11 @@ export function InvestmentsProvider({ children }: { children: ReactNode }) {
       const response = await fetch('/api/investments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, startDate: data.startDate.toISOString() }),
+        body: JSON.stringify({ 
+          ...data, 
+          startDate: data.startDate.toISOString(),
+          maturityDate: data.maturityDate ? data.maturityDate.toISOString() : null
+        }),
       });
       if (!response.ok) throw new Error('Failed to add investment');
       await fetchInvestments();
@@ -77,7 +82,11 @@ export function InvestmentsProvider({ children }: { children: ReactNode }) {
       const response = await fetch(`/api/investments/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, startDate: data.startDate.toISOString() }),
+        body: JSON.stringify({ 
+          ...data, 
+          startDate: data.startDate.toISOString(),
+          maturityDate: data.maturityDate ? data.maturityDate.toISOString() : null
+        }),
       });
       if (!response.ok) throw new Error('Failed to update investment');
       await fetchInvestments();

@@ -31,19 +31,19 @@ export async function POST(req: Request) {
 
   try {
     const body: Omit<Investment, 'id'> = await req.json();
-    const { type, startDate } = body;
+    const { type, startDate, yieldPeriod, maturityDate } = body;
     const amount = parseFloat(body.amount as any);
     const yieldRate = parseFloat(body.yieldRate as any);
     
-    if (!type || !amount || !yieldRate || !startDate) {
-        return new NextResponse('Missing required fields', { status: 400 });
+    if (!type || isNaN(amount) || isNaN(yieldRate) || !startDate || !yieldPeriod) {
+        return new NextResponse('Missing required fields or invalid data', { status: 400 });
     }
 
     const id = crypto.randomUUID();
 
     const { rows: newInvestment } = await db.query(
-      'INSERT INTO investments (id, user_id, type, amount, yield_rate, start_date) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [id, user.id, type, amount, yieldRate, startDate]
+      'INSERT INTO investments (id, user_id, type, amount, yield_rate, yield_period, start_date, maturity_date) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+      [id, user.id, type, amount, yieldRate, yieldPeriod, startDate, maturityDate || null]
     );
 
     return NextResponse.json(newInvestment[0], { status: 201 });

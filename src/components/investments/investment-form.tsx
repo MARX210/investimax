@@ -11,6 +11,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
@@ -23,12 +24,15 @@ import {
 import { INVESTMENT_TYPES } from '@/lib/data';
 import type { Investment } from '@/lib/types';
 import { DatePicker } from '../ui/date-picker';
+import { Separator } from '@/components/ui/separator';
 
 const FormSchema = z.object({
-  type: z.string().min(2, 'O tipo deve ter pelo menos 2 caracteres.'),
+  type: z.string().min(1, 'Selecione o tipo de ativo.'),
   amount: z.coerce.number().positive('O valor deve ser positivo.'),
   yieldRate: z.coerce.number().positive('A rentabilidade deve ser positiva.'),
+  yieldPeriod: z.enum(['annual', 'monthly']),
   startDate: z.date(),
+  maturityDate: z.date().optional().nullable(),
 });
 
 export type InvestmentFormData = z.infer<typeof FormSchema>;
@@ -46,84 +50,133 @@ export default function InvestmentForm({ onSave, onCancel, defaultValues }: Inve
       type: defaultValues?.type || '',
       amount: defaultValues?.amount || 0,
       yieldRate: defaultValues?.yieldRate || 0,
+      yieldPeriod: (defaultValues?.yieldPeriod as any) || 'annual',
       startDate: defaultValues?.startDate ? new Date(defaultValues.startDate) : new Date(),
+      maturityDate: defaultValues?.maturityDate ? new Date(defaultValues.maturityDate) : null,
     },
   });
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSave)} className="space-y-6 p-1">
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo de Investimento</FormLabel>
-               <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo de ativo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {INVESTMENT_TYPES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-         <FormField
-          control={form.control}
-          name="amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Valor Investido (R$)</FormLabel>
-              <FormControl>
-                <Input type="number" placeholder="1000,00" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-4">
           <FormField
             control={form.control}
-            name="yieldRate"
+            name="type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Rentabilidade Anual (%)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="10.75" {...field} />
-                </FormControl>
+                <FormLabel>Ativo</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo de ativo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {INVESTMENT_TYPES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
-            name="startDate"
+            name="amount"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Data de Início</FormLabel>
-                <DatePicker
-                  date={field.value}
-                  setDate={field.onChange}
-                  disabled={(date) => date < new Date('1900-01-01')}
-                />
+              <FormItem>
+                <FormLabel>Valor Aplicado (R$)</FormLabel>
+                <FormControl>
+                  <Input type="number" step="0.01" placeholder="1000,00" {...field} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
+        <Separator />
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="yieldRate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Taxa (%)</FormLabel>
+                  <FormControl>
+                    <Input type="number" step="0.01" placeholder="10.75" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="yieldPeriod"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Período</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="annual">Ao Ano</SelectItem>
+                      <SelectItem value="monthly">Ao Mês</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="startDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Início da Aplicação</FormLabel>
+                  <DatePicker date={field.value} setDate={field.onChange} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="maturityDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Vencimento (Opcional)</FormLabel>
+                  <DatePicker 
+                    date={field.value || undefined} 
+                    setDate={(date) => field.onChange(date || null)} 
+                  />
+                  <FormDescription>Quando o dinheiro será liberado.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
         <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="ghost" onClick={onCancel} className="flex-1 sm:flex-none">Cancelar</Button>
-            <Button type="submit" className="flex-1 sm:flex-none">Salvar</Button>
+          <Button type="button" variant="ghost" onClick={onCancel} className="flex-1 sm:flex-none">Cancelar</Button>
+          <Button type="submit" className="flex-1 sm:flex-none px-8">Salvar</Button>
         </div>
       </form>
     </Form>
