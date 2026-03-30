@@ -1,3 +1,4 @@
+
 'use server';
 import { db } from '@/lib/db';
 import bcrypt from 'bcryptjs';
@@ -43,7 +44,8 @@ export async function POST(req: Request) {
       .setExpirationTime('2h')
       .sign(secret);
       
-    cookies().set('session', token, {
+    const cookieStore = await cookies();
+    cookieStore.set('session', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
         maxAge: 60 * 60 * 2, // 2 hours
