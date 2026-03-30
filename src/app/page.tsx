@@ -60,31 +60,33 @@ export default function DashboardPage() {
           <CardTitle>Visão Geral</CardTitle>
           <CardDescription>Selecione o período que deseja analisar.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-           <Select value={String(selectedMonth)} onValueChange={(val) => setSelectedMonth(Number(val))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Mês" />
-            </SelectTrigger>
-            <SelectContent>
-              {months.map((month) => (
-                <SelectItem key={month.value} value={String(month.value)}>
-                  {month.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={String(selectedYear)} onValueChange={(val) => setSelectedYear(Number(val))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Ano" />
-            </SelectTrigger>
-            <SelectContent>
-              {years.map((year) => (
-                <SelectItem key={year} value={String(year)}>
-                  {year}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:w-1/2">
+            <Select value={String(selectedMonth)} onValueChange={(val) => setSelectedMonth(Number(val))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Mês" />
+              </SelectTrigger>
+              <SelectContent>
+                {months.map((month) => (
+                  <SelectItem key={month.value} value={String(month.value)}>
+                    {month.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={String(selectedYear)} onValueChange={(val) => setSelectedYear(Number(val))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Ano" />
+              </SelectTrigger>
+              <SelectContent>
+                {years.map((year) => (
+                  <SelectItem key={year} value={String(year)}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
       
