@@ -24,7 +24,7 @@ import { ptBR } from 'date-fns/locale';
 import { getCategoryIcon } from '@/lib/icons';
 import { PAYMENT_METHODS } from '@/lib/data';
 import { formatCurrency, cn } from '@/lib/utils';
-import { MoreVertical, Trash2, Pencil, ArrowUp, ArrowDown } from 'lucide-react';
+import { MoreVertical, Trash2, Pencil, ArrowUp, ArrowDown, Calendar } from 'lucide-react';
 import type { Transaction } from '@/lib/types';
 import EditTransactionSheet from '@/components/transactions/edit-transaction-sheet';
 import { Skeleton } from '../ui/skeleton';
@@ -73,7 +73,7 @@ export default function TransactionsList({ transactions, isLoading }: Transactio
     return (
       <div className="space-y-4">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="flex items-center gap-4 rounded-md border p-4">
+          <div key={i} className="flex items-center gap-4 rounded-xl border p-4 bg-card">
             <Skeleton className="h-10 w-10 rounded-full" />
             <div className="flex-1 space-y-2">
               <Skeleton className="h-4 w-3/4" />
@@ -88,7 +88,7 @@ export default function TransactionsList({ transactions, isLoading }: Transactio
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-3">
         {transactions.length > 0 ? (
           transactions.map((t) => {
             const Icon = getCategoryIcon(t.category);
@@ -96,55 +96,77 @@ export default function TransactionsList({ transactions, isLoading }: Transactio
             const paymentMethodLabel = getPaymentMethodLabel(t.paymentMethod as keyof typeof PAYMENT_METHODS);
 
             return (
-              <div key={t.id} className="flex items-center gap-4 rounded-md border p-4">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-secondary">
+              <div key={t.id} className="relative flex items-center gap-3 sm:gap-4 rounded-xl border p-3 sm:p-4 bg-card shadow-sm hover:shadow-md transition-shadow">
+                <div className={cn(
+                  "flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-full",
+                  isIncome ? "bg-green-100 text-green-600" : "bg-muted text-muted-foreground"
+                )}>
                   {isIncome ? (
-                    <ArrowUp className="h-5 w-5 text-green-500" />
+                    <ArrowUp className="h-5 w-5 sm:h-6 sm:w-6" />
                   ) : (
-                    <Icon className="h-5 w-5 text-muted-foreground" />
+                    <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="truncate font-medium">{t.description}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {isClient ? format(new Date(t.date), "dd 'de' MMM, yyyy", { locale: ptBR }) : ''}
-                    {paymentMethodLabel && ` • ${paymentMethodLabel}`}
+                
+                <div className="flex-1 min-w-0 pr-8 sm:pr-0">
+                  <p className="truncate font-bold text-sm sm:text-base text-foreground leading-tight">
+                    {t.description}
                   </p>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
+                    <span className="flex items-center text-[10px] sm:text-xs text-muted-foreground font-medium">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      {format(new Date(t.date), "dd 'de' MMM", { locale: ptBR })}
+                    </span>
+                    {paymentMethodLabel && (
+                      <>
+                        <span className="text-muted-foreground/30 hidden sm:inline">•</span>
+                        <span className="text-[10px] sm:text-xs text-muted-foreground font-medium bg-secondary px-1.5 py-0.5 rounded">
+                          {paymentMethodLabel}
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
+
+                <div className="flex items-center gap-2 sm:gap-4">
                   <div
                     className={cn(
-                      'font-semibold',
-                      isIncome ? 'text-green-500' : 'text-foreground'
+                      'font-bold text-sm sm:text-lg whitespace-nowrap',
+                      isIncome ? 'text-green-600' : 'text-foreground'
                     )}
                   >
                     {isIncome ? '+' : '-'}
                     {formatCurrency(t.amount)}
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEdit(t)}>
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleDeleteRequest(t.id)} className="text-red-500">
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  
+                  <div className="absolute top-2 right-2 sm:static">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuItem onClick={() => handleEdit(t)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDeleteRequest(t.id)} className="text-red-500">
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               </div>
             );
           })
         ) : (
-          <div className="flex h-24 items-center justify-center rounded-md border border-dashed">
-            <p className="text-sm text-muted-foreground">Nenhuma transação encontrada para este período.</p>
+          <div className="flex h-32 flex-col items-center justify-center rounded-xl border border-dashed text-center p-6 bg-muted/20">
+            <ArrowDown className="h-8 w-8 text-muted-foreground/50 mb-2" />
+            <p className="text-sm text-muted-foreground font-medium">Nenhuma transação encontrada.</p>
+            <p className="text-xs text-muted-foreground mt-1">Ajuste os filtros ou adicione um novo registro.</p>
           </div>
         )}
       </div>
@@ -158,7 +180,7 @@ export default function TransactionsList({ transactions, isLoading }: Transactio
       )}
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="w-[95vw] sm:max-w-[425px]">
           <AlertDialogHeader>
             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -167,7 +189,7 @@ export default function TransactionsList({ transactions, isLoading }: Transactio
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Excluir</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-500 hover:bg-red-600">Excluir</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

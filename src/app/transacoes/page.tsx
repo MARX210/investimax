@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getMonth, getYear, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Search } from 'lucide-react';
 
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
@@ -34,29 +35,32 @@ export default function TransactionsPage() {
   }, [transactions, searchTerm, typeFilter, selectedMonth, selectedYear]);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6 lg:gap-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Transações</h1>
-        <p className="text-muted-foreground">Visualize e gerencie suas movimentações financeiras.</p>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Transações</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">Visualize e gerencie suas movimentações financeiras.</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Filtros</CardTitle>
+      <Card className="border-none shadow-sm sm:border">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg">Filtros</CardTitle>
           <CardDescription>Refine sua busca por transações.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Input
-              placeholder="Buscar por descrição..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full"
-            />
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+            <div className="relative w-full lg:col-span-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9 w-full"
+              />
+            </div>
             
             <div className="grid grid-cols-2 gap-2 lg:col-span-2">
               <Select value={String(selectedMonth)} onValueChange={(val) => setSelectedMonth(Number(val))}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Mês" />
                 </SelectTrigger>
                 <SelectContent>
@@ -68,7 +72,7 @@ export default function TransactionsPage() {
                 </SelectContent>
               </Select>
               <Select value={String(selectedYear)} onValueChange={(val) => setSelectedYear(Number(val))}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Ano" />
                 </SelectTrigger>
                 <SelectContent>
@@ -82,7 +86,7 @@ export default function TransactionsPage() {
             </div>
 
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Tipo" />
               </SelectTrigger>
               <SelectContent>
@@ -96,7 +100,6 @@ export default function TransactionsPage() {
       </Card>
       
       <TransactionsList transactions={filteredTransactions} isLoading={isLoading} />
-
     </div>
   );
 }

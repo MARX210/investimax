@@ -54,43 +54,45 @@ export default function DashboardPage() {
   }, [transactions, filteredTransactions, selectedMonth, selectedYear]);
 
   return (
-    <div className="flex flex-col gap-8">
-       <Card>
-        <CardHeader>
+    <div className="flex flex-col gap-6 lg:gap-8">
+       <Card className="border-none shadow-sm sm:border">
+        <CardHeader className="pb-4">
           <CardTitle>Visão Geral</CardTitle>
           <CardDescription>Selecione o período que deseja analisar.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:w-1/2">
-            <Select value={String(selectedMonth)} onValueChange={(val) => setSelectedMonth(Number(val))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Mês" />
-              </SelectTrigger>
-              <SelectContent>
-                {months.map((month) => (
-                  <SelectItem key={month.value} value={String(month.value)}>
-                    {month.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={String(selectedYear)} onValueChange={(val) => setSelectedYear(Number(val))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Ano" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map((year) => (
-                  <SelectItem key={year} value={String(year)}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex flex-col sm:flex-row gap-3 lg:w-max">
+            <div className="grid grid-cols-2 gap-2 w-full sm:w-[300px]">
+              <Select value={String(selectedMonth)} onValueChange={(val) => setSelectedMonth(Number(val))}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Mês" />
+                </SelectTrigger>
+                <SelectContent>
+                  {months.map((month) => (
+                    <SelectItem key={month.value} value={String(month.value)}>
+                      {month.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={String(selectedYear)} onValueChange={(val) => setSelectedYear(Number(val))}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Ano" />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((year) => (
+                    <SelectItem key={year} value={String(year)}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <SummaryCard
           title="Saldo Total (até o mês)"
           value={totalBalance}
@@ -116,20 +118,20 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-5">
-        <div className="lg:col-span-3">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-5">
+        <div className="lg:col-span-3 h-full">
           <MonthlySummaryChart transactions={transactions} />
         </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 h-full">
           <CategoryPieChart transactions={filteredTransactions} />
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-5">
-        <div className="lg:col-span-3">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-5">
+        <div className="lg:col-span-3 h-full">
           <RecentTransactions transactions={filteredTransactions} />
         </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 h-full">
           <SpendingAnalysisCard transactions={filteredTransactions}/>
         </div>
       </div>
