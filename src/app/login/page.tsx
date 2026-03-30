@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -73,6 +72,7 @@ export default function LoginPage() {
   if (!isMounted) return null;
 
   const button3DClass = "relative border-b-4 border-primary-foreground/20 active:border-b-0 active:translate-y-1 transition-all duration-75 shadow-lg active:shadow-none";
+  const inputStyle = "bg-white/70 border-white/30 text-black placeholder:text-gray-600 font-medium";
 
   return (
     <div className="relative flex min-h-screen items-center justify-center p-4 overflow-hidden">
@@ -119,7 +119,7 @@ export default function LoginPage() {
                       id="login-email" 
                       type="email" 
                       placeholder="seu@email.com" 
-                      className="bg-white/50 border-white/30"
+                      className={inputStyle}
                       value={loginEmail} 
                       onChange={(e) => setLoginEmail(e.target.value)} 
                       required 
@@ -132,7 +132,7 @@ export default function LoginPage() {
                       <Input 
                         id="login-password" 
                         type={showLoginPassword ? "text" : "password"} 
-                        className="bg-white/50 border-white/30 pr-10"
+                        className={`${inputStyle} pr-10`}
                         value={loginPassword} 
                         onChange={(e) => setLoginPassword(e.target.value)} 
                         required 
@@ -141,7 +141,7 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={() => setShowLoginPassword(!showLoginPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700 hover:text-black transition-colors"
                         tabIndex={-1}
                       >
                         {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -173,7 +173,7 @@ export default function LoginPage() {
                     <Input 
                       id="register-name" 
                       placeholder="Seu Nome" 
-                      className="bg-white/50 border-white/30"
+                      className={inputStyle}
                       value={registerName} 
                       onChange={(e) => setRegisterName(e.target.value)} 
                       required 
@@ -186,7 +186,7 @@ export default function LoginPage() {
                       id="register-email" 
                       type="email" 
                       placeholder="seu@email.com" 
-                      className="bg-white/50 border-white/30"
+                      className={inputStyle}
                       value={registerEmail} 
                       onChange={(e) => setRegisterEmail(e.target.value)} 
                       required 
@@ -199,7 +199,7 @@ export default function LoginPage() {
                       <Input 
                         id="register-password" 
                         type={showRegisterPassword ? "text" : "password"} 
-                        className="bg-white/50 border-white/30 pr-10"
+                        className={`${inputStyle} pr-10`}
                         value={registerPassword} 
                         onChange={(e) => setRegisterPassword(e.target.value)} 
                         required 
@@ -208,7 +208,7 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={() => setShowRegisterPassword(!showRegisterPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700 hover:text-black transition-colors"
                         tabIndex={-1}
                       >
                         {showRegisterPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
