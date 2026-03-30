@@ -41,16 +41,27 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
     try {
       const response = await fetch('/api/transactions');
       if (!response.ok) {
-        throw new Error('Failed to fetch transactions');
+        console.warn('Não foi possível carregar as transações.');
+        setTransactions([]);
+        return;
       }
-      const data: Transaction[] = await response.json();
-      const formattedData = data.map(t => ({
-        ...t,
-        amount: typeof t.amount === 'string' ? parseFloat(t.amount) : t.amount
+      const data = await response.json();
+      
+      // Mapeia os dados do banco de dados (snake_case) para o frontend (camelCase)
+      const formattedData: Transaction[] = data.map((t: any) => ({
+        id: t.id,
+        type: t.type,
+        amount: typeof t.amount === 'string' ? parseFloat(t.amount) : (t.amount || 0),
+        description: t.description,
+        category: t.category,
+        date: t.date,
+        isRecurring: t.is_recurring,
+        paymentMethod: t.payment_method,
       }));
+      
       setTransactions(formattedData);
     } catch (error) {
-      console.error('Error fetching transactions:', error);
+      console.error('Erro ao buscar transações:', error);
       setTransactions([]);
     } finally {
       setIsLoading(false);
@@ -67,12 +78,8 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
 
       if (rest.type === 'expense' && rest.paymentMethod === 'credit' && installments > 1) {
         const newTransactionsData = [];
-        // Se o usuário diz que o valor de R$ 1000 é o total da compra, dividimos.
-        // Se o usuário diz que R$ 1000 é a parcela, usamos o valor cheio.
-        // Aqui assumimos que o valor inserido é o valor de CADA parcela para facilitar.
         const baseAmount = rest.amount;
         
-        // Loop da parcela atual até a última
         for (let i = currentInstallment; i <= installments; i++) {
           const monthsToAdd = i - currentInstallment;
           newTransactionsData.push({

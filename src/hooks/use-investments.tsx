@@ -30,18 +30,24 @@ export function InvestmentsProvider({ children }: { children: ReactNode }) {
     try {
       const response = await fetch('/api/investments');
       if (!response.ok) {
-        throw new Error('Failed to fetch investments');
+        console.warn('Não foi possível carregar os investimentos. Verifique a conexão com o banco de dados.');
+        setInvestments([]);
+        return;
       }
-      const data: Investment[] = await response.json();
-      // Ensure amount and yieldRate are numbers
-      const formattedData = data.map(inv => ({
-        ...inv,
-        amount: typeof inv.amount === 'string' ? parseFloat(inv.amount) : inv.amount,
-        yieldRate: typeof inv.yieldRate === 'string' ? parseFloat(inv.yieldRate) : inv.yieldRate,
+      const data = await response.json();
+      
+      // Mapeia os dados do banco de dados (snake_case) para o frontend (camelCase)
+      const formattedData: Investment[] = data.map((inv: any) => ({
+        id: inv.id,
+        type: inv.type,
+        amount: typeof inv.amount === 'string' ? parseFloat(inv.amount) : (inv.amount || 0),
+        yieldRate: typeof inv.yield_rate === 'string' ? parseFloat(inv.yield_rate) : (inv.yield_rate || 0),
+        startDate: inv.start_date,
       }));
+      
       setInvestments(formattedData);
     } catch (error) {
-      console.error('Error fetching investments:', error);
+      console.error('Erro ao buscar investimentos:', error);
       setInvestments([]);
     } finally {
       setIsLoading(false);
