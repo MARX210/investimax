@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, ReactNode, useMemo, useEffect, useCallback } from 'react';
 import type { User } from '@/lib/types';
 import { useRouter } from 'next/navigation';
+import { useToast } from './use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -12,6 +13,8 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   register: (data: Omit<User, 'id'> & { password: string }) => Promise<boolean>;
   logout: () => void;
+  updatePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
+  deleteAccount: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { toast } = useToast();
   
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -56,16 +60,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!response.ok) {
         const errorData = await response.text();
         console.error('Registration failed:', errorData);
-        alert(`Erro no cadastro: ${errorData}`);
+        toast({
+          variant: 'destructive',
+          title: 'Erro no cadastro',
+          description: errorData,
+        });
         return false;
       }
       
-      alert('Cadastro realizado com sucesso! Você já pode fazer o login.');
+      toast({
+        title: 'Cadastro realizado!',
+        description: 'Você já pode fazer o login com sua nova conta.',
+      });
       return true;
 
     } catch (error) {
       console.error('An error occurred during registration:', error);
-      alert('Ocorreu um erro durante o cadastro. Tente novamente.');
       return false;
     }
   };
@@ -76,6 +86,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push('/login');
   }, [router]);
 
+  const updatePassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/auth/profile/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        toast({
+          variant: 'destructive',
+          title: 'Erro ao alterar senha',
+          description: error,
+        });
+        return false;
+      }
+
+      toast({
+        title: 'Senha alterada!',
+        description: 'Sua senha foi atualizada com sucesso.',
+      });
+      return true;
+    } catch (error) {
+      console.error('Error updating password:', error);
+      return false;
+    }
+  };
+
+  const deleteAccount = async (): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/auth/profile/delete', {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        toast({
+          variant: 'destructive',
+          title: 'Erro ao excluir conta',
+          description: 'Não foi possível excluir sua conta no momento.',
+        });
+        return false;
+      }
+
+      setUser(null);
+      router.push('/login');
+      toast({
+        title: 'Conta excluída',
+        description: 'Sentimos muito em ver você partir.',
+      });
+      return true;
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      return false;
+    }
+  };
+
   const contextValue = useMemo(() => ({
     user,
     setUser,
@@ -84,6 +151,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     register,
     logout,
+    updatePassword,
+    deleteAccount,
   }), [user, isLoading, logout]);
 
   return (
